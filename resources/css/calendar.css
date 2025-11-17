@@ -1,0 +1,326 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+
+body {
+    font-family: "Open Sans", sans-serif;
+    background-color: #efefef;
+}
+
+p {
+    font-weight: 300;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+    font-family: "Open Sans", sans-serif;
+}
+
+a {
+    -webkit-transition: 0.3s all ease;
+    -o-transition: 0.3s all ease;
+    transition: 0.3s all ease;
+}
+
+a,
+a:hover {
+    text-decoration: none !important;
+}
+
+.content {
+    padding: 7rem 0;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+.form-control:active,
+.form-control:focus {
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+#calendar {
+    max-width: 900px;
+    min-width: 900px;
+    margin: 0 auto;
+    width: 667px;
+}
+
+#cal_mobile {
+    display: none;
+}
+#calendar .fc-view-container {
+    padding: 30px;
+    background-color: #fff;
+    box-shadow: 0 0 30px rgba(1, 41, 112, 0.1);
+    border-radius: .25rem;
+}
+
+.fc .fc-button:not(:disabled) {
+    background-color: green;
+    border-color: green;
+}
+
+.fc .fc-button:not(:disabled):hover {
+    background-color: darkgreen;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active {
+    background-color: green;
+    border-color: green;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 0, .5);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active:focus, .fc .fc-button-primary:not(:disabled):active:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 0, .5);
+}
+
+.fc .fc-button-primary:focus {
+    background-color: darkgreen;
+    border-color: darkgreen;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 0, .5);
+}
+
+.fc-scrollgrid-sync-inner {
+    padding: .25rem;
+}
+
+.fc-daygrid-day-frame {
+    padding: .5rem;
+}
+
+.fc-col-header-cell-cushion, .fc-daygrid-day-number {
+    color: #1e1e1e;
+}
+
+.fc-col-header, .fc .fc-daygrid-body, .fc .fc-scrollgrid-section-body table {
+    width: 100% !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: rgb(0, 123, 0, .15);
+}
+
+.modal-backdrop {
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, .5) !important;
+}
+
+body.modal-open {
+    overflow: visible !important;
+}
+
+.fc-direction-ltr .fc-daygrid-event.fc-event-end {
+    color: green;
+}
+
+.fc-daygrid-event-dot {
+    border: calc(8px / 2) solid green;
+}
+
+#pamphlet {
+    display: block;
+    width: 100%;
+}
+
+.modal-body {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.card.info-card.sales-card {
+    box-shadow: 0 0 30px rgba(1, 41, 112, 0.1);
+}
+
+.btn-close:focus {
+    box-shadow: 0 0 0 0.25rem rgb(0, 123, 0, .25) !important;
+}
+
+@media (max-width: 768px) {
+    .container.my-5.pt-3.text-center h1.fw-semibold.pt-5 {
+        font-size: 1.5rem; /* Ukuran font judul utama lebih kecil */
+        padding-top: 0.5rem !important; /* Sesuaikan padding top */
+        margin-top: 1rem !important; /* Adjust top margin */
+    }
+
+    .container-content.mb-4.py-1.pb-2 {
+        padding: 0.5rem !important; /* Kurangi padding container kalender */
+        padding-right: 7px !important; /* Reduce right padding */
+        margin-bottom: 0.75rem !important; /* Adjust bottom margin */
+    }
+
+    #calendar {
+        display:none;
+    }
+    #cal_mobile{
+        position: relative; /* Agar elemen overlay dan button bisa diposisikan absolute */
+        display: block; /* Pastikan menjadi block agar bisa diatur ukuran dan position */
+        margin-top: 10px;
+        text-decoration: none; /* Hilangkan garis bawah link */
+    }
+
+    #cal_mobile img {
+        display: block; /* Hilangkan ruang kosong di bawah gambar */
+        width: 100%; /* Agar gambar responsif mengisi lebar link */
+        height: auto;
+    }
+
+    #cal_mobile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5); /* Hitam transparan (opacity 0.5) */
+        z-index: 1; /* Pastikan overlay berada di atas gambar */
+        border-radius: inherit; /* Jika gambar memiliki border-radius, overlay juga akan memilikinya */
+    }
+
+    #cal_mobile .button-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Untuk memposisikan button tepat di tengah */
+        z-index: 2; /* Pastikan button berada di atas overlay */
+        background-color: #333; /* Warna latar belakang button (bisa disesuaikan) */
+        color: white; /* Warna teks button (bisa disesuaikan) */
+        padding: 8px 16px; /* Padding button (bisa disesuaikan) */
+        border: none;
+        border-radius: 5px; /* Bentuk border button (bisa disesuaikan) */
+        cursor: pointer;
+        font-size: 0.9rem; /* Ukuran font button (bisa disesuaikan) */
+    }
+
+
+    /* Styling untuk tabel agenda kegiatan */
+    .container.mb-4.pb-4.pt-2 {
+        padding: 0.75rem !important; /* Kurangi padding container tabel */
+    }
+
+    .card.info-card.sales-card.rounded-2.border-0.p-4 {
+        padding: 0.75rem !important; /* Kurangi padding card tabel */
+    }
+
+    .table-responsive {
+        overflow-x: auto; /* Membuat tabel bisa di-scroll horizontal jika kontennya lebar */
+    }
+
+    .table thead tr.fs-5 th.p-4 {
+        padding: 0.5rem !important; /* Kurangi padding header tabel */
+        font-size: 0.8rem; /* Ukuran font header tabel lebih kecil */
+    }
+
+    .table tbody tr td.p-4 {
+        padding: 0.5rem !important; /* Kurangi padding sel tabel */
+        font-size: 0.75rem; /* Ukuran font sel tabel lebih kecil */
+    }
+
+    /* Styling untuk tabel hari besar nasional */
+    .container:nth-child(5).my-5.pt-3.text-center h1.fw-semibold.pt-5 { /* Target judul "Hari Besar Nasional" */
+        font-size: 1.5rem; /* Ukuran font judul hari besar lebih kecil */
+        padding-top: 0.5rem !important; /* Sesuaikan padding top */
+    }
+
+    .container:nth-child(6).mb-4.pb-4.pt-2 { /* Target container tabel hari besar */
+        padding: 0.5rem !important; /* Kurangi padding container tabel hari besar */
+    }
+
+    .container:nth-child(6) .card.info-card.sales-card.rounded-2.border-0.p-4 { /* Target card tabel hari besar */
+        padding: 0.5rem !important; /* Kurangi padding card tabel hari besar */
+    }
+
+    .container:nth-child(6) .table thead tr.fs-5 th.p-4 { /* Target header tabel hari besar */
+        padding: 0.5rem !important;
+        font-size: 0.8rem;
+    }
+
+    .container:nth-child(6) .table tbody tr td.p-4 { /* Target sel tabel hari besar */
+        padding: 0.5rem !important;
+        font-size: 0.75rem;
+    }
+
+    /* Styling untuk modal */
+    .modal-dialog.modal-lg {
+        max-width: 95%; /* Modal mengambil hampir seluruh lebar layar */
+        margin: 0.5rem auto; /* Atur margin modal */
+    }
+
+    .modal-body.p-5 {
+        padding: 1rem !important; /* Kurangi padding modal body */
+    }
+
+    .modal-title.fs-4 {
+        font-size: 1rem; /* Ukuran font judul modal lebih kecil */
+    }
+
+    .modal-body .row {
+        display: block !important; /* Membuat kolom di dalam modal bertumpuk */
+    }
+
+    .modal-body .row .col-md-4,
+    .modal-body .row .col-md-8 {
+        width: 100% !important; /* Membuat kolom di dalam modal mengambil seluruh lebar */
+        margin-bottom: 0.5rem; /* Tambahkan margin bawah antar kolom */
+    }
+}
+
+/* Gaya untuk #cal_mobile dan img di luar media query jika diperlukan pada layar besar */
+#cal_mobile {
+    display: none; /* Sembunyikan secara default pada layar besar */
+}
+
+@media (max-width: 768px) {
+    #cal_mobile {
+        display: block; /* Tampilkan hanya pada layar kecil */
+        position: relative;
+        text-decoration: none;
+        margin-top: 10px;
+    }
+
+    #cal_mobile img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    #cal_mobile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        border-radius: inherit;
+    }
+
+    #cal_mobile .button-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        background-color: green;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+}

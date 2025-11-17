@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+* {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 0, 0.25) !important;
+    border-color: green !important;
+}
+
+.bg-login {
+    background-color: white;
+    height: 100vh;
+}
+
+.back-btn:focus {
+    border: none;
+}
+
+#preloader {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9999;
+    background-color: white;
+    overflow: hidden;
+    /*background: rgba(0, 0, 0, 0.5); !* Warna hitam dengan transparansi 50% *!*/
+}
+
+#preloader:before {
+    position: fixed;
+    top: calc(50% - 30px);
+    left: calc(50% - 30px);
+    -webkit-animation: animate-preloader 1s linear infinite;
+    animation: animate-preloader 2s linear infinite;
+    border: 6px solid #f2f2f2;
+    border-top: 6px solid green;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    content: '';
+}
+
+@-webkit-keyframes animate-preloader {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes animate-preloader {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .bg-login {
+        padding: 15px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .logo-img {
+        width: 70px;
+    }
+
+    .form-control {
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+}
