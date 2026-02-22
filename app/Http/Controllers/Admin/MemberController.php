@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Gender;
 use App\Enums\MembershipStatus;
 use App\Http\Controllers\Controller;
-use Illuminate\Validation\Rule; 
+use Illuminate\Validation\Rule;
 use App\Models\Member;
 use App\Models\PAC;
 use App\Models\User;
@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Schema;
-
-
 
 class MemberController extends Controller
 {
@@ -29,9 +27,9 @@ class MemberController extends Controller
         $query = Member::query();
 
         // Jika ada pencarian, tambahkan filter ke query
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where('name', 'like', "%$search%");
-            
+
             if (Schema::hasColumn('members', 'phone')) {
                 $query->orWhere('phone', 'like', "%$search%");
             }
@@ -47,7 +45,7 @@ class MemberController extends Controller
 
         // Filter berdasarkan gender untuk IPNU / IPPNU
         if ($filter === 'IPNU') {
-            $query->where('gender', 'male'); 
+            $query->where('gender', 'male');
         } elseif ($filter === 'IPPNU') {
             $query->where('gender', 'female');
         }
@@ -56,14 +54,10 @@ class MemberController extends Controller
         $members = $query->orderBy('name', 'asc')->paginate(10);
 
         // Menentukan apakah pencarian sedang aktif
-        $isSearchActive = !empty($search);
+        $isSearchActive = ! empty($search);
 
         return view('admins.members.index', compact('members', 'totalMembers', 'filter', 'isSearchActive'));
     }
-
-
-
-
 
     //    public function showStatistic(Request $request)
     //    {
@@ -71,7 +65,6 @@ class MemberController extends Controller
     //
     //        return view('admins.index', compact(['statistic']));
     //    }
-
 
     public function search(Request $request, $slug)
     {
@@ -94,9 +87,6 @@ class MemberController extends Controller
 
         return view('admins.pac.show', compact('pac', 'members', 'message', 'search'));
     }
-
-
-
 
     public function create()
     {
@@ -366,9 +356,9 @@ class MemberController extends Controller
                         'pac_id' => 'required|integer',
                         'membership_status' => 'required|string',
                     ],
-            )
+            ),
         );
-        
+
         // Tambahkan gender dan pac_id
         $validatedData['gender'] = Gender::tryFrom($request->gender);
         $user = Auth::user();
@@ -386,7 +376,7 @@ class MemberController extends Controller
         $validatedData['lakmud_year'] = $validatedData['is_lakmud'] ? $validatedData['lakmud_year'] : null;
         $validatedData['is_lakut'] = $formalCadres->contains('lakut');
         $validatedData['lakut_year'] = $validatedData['is_lakut'] ? $validatedData['lakut_year'] : null;
-        
+
         $nonFormalCadres = collect($request->input('non_formal_cadre_levels', []));
         $validatedData['is_diklatama'] = $nonFormalCadres->contains('diklatama');
         $validatedData['is_diklatnas'] = $nonFormalCadres->contains('diklatnas');
@@ -399,33 +389,31 @@ class MemberController extends Controller
             // Ambil slug PAC dan ID member
             $pacSlug = Str::slug($member->pac->pac);
             $memberId = $member->id;
-        
+
             // Hapus foto lama jika ada
-            $oldPhotoPath = public_path("storage/images/members/{$pacSlug}/{$memberId}/{$member->photo}");
+            $oldPhotoPath = storage_path("app/public/images/members/{$pacSlug}/{$memberId}/{$member->photo}");
             if ($member->photo && $member->photo !== 'default.png' && file_exists($oldPhotoPath)) {
                 unlink($oldPhotoPath);
             }
-        
+
             // Simpan foto baru
             $file = $request->file('photo');
             $filename = Str::slug($request->name) . '-' . now()->timestamp . '.' . $file->getClientOriginalExtension();
-        
+
             // Path tujuan yang benar
-            $destinationPath = public_path("storage/images/members/{$pacSlug}/{$memberId}/");
-        
+            $destinationPath = storage_path("app/public/images/members/{$pacSlug}/{$memberId}/");
+
             // Buat folder jika belum ada
-            if (!file_exists($destinationPath)) {
+            if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
-        
+
             // Pindahkan file ke lokasi tujuan
             $file->move($destinationPath, $filename);
-        
+
             // Simpan path relatif ke database
             $validatedData['photo'] = "images/members/{$pacSlug}/{$memberId}/{$filename}";
         }
-        
-                
 
         // Update data anggota
         $updated = $member->update($validatedData);
@@ -441,7 +429,6 @@ class MemberController extends Controller
         // Redirect ke index setelah update
         return redirect()->route('dashboard.members.index');
     }
-
 
     public function destroy(Member $member)
     {
@@ -473,44 +460,44 @@ class MemberController extends Controller
         $search = $request->input('search');
         $user = auth()->user();
 
-        $query = Member::where('is_makesta', true)
-            ->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                    ->orWhereHas('pac', function ($q) use ($search) {
-                        $q->where('pac', 'like', "%$search%");
-                    });
+        $query = Member::where('is_makesta', true)->where(function ($query) use ($search) {
+            $query->where('name', 'like', "%$search%")->orWhereHas('pac', function ($q) use ($search) {
+                $q->where('pac', 'like', "%$search%");
             });
+        });
 
         // Jika pengguna adalah admin PAC, filter berdasarkan pac_id
         if ($user->role_id == 3) {
             $query->where('pac_id', $user->pac_id);
         }
 
-        $makestaCadres = $query->with('pac')->latest()->paginate(10);
+        $makestaCadres = $query
+            ->with('pac')
+            ->latest()
+            ->paginate(10);
 
         return view('admins.members.makesta', compact('makestaCadres', 'search'));
     }
-
-
 
     public function showLakmudCadres(Request $request)
     {
         $search = $request->input('search');
         $user = auth()->user();
 
-        $query = Member::where('is_lakmud', true)
-            ->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                    ->orWhereHas('pac', function ($q) use ($search) {
-                        $q->where('pac', 'like', "%$search%");
-                    });
+        $query = Member::where('is_lakmud', true)->where(function ($query) use ($search) {
+            $query->where('name', 'like', "%$search%")->orWhereHas('pac', function ($q) use ($search) {
+                $q->where('pac', 'like', "%$search%");
             });
+        });
 
         if ($user->role_id == 3) {
             $query->where('pac_id', $user->pac_id);
         }
 
-        $lakmudCadres = $query->with('pac')->latest()->paginate(10);
+        $lakmudCadres = $query
+            ->with('pac')
+            ->latest()
+            ->paginate(10);
         return view('admins.members.lakmud', compact('lakmudCadres', 'search'));
     }
 
@@ -519,19 +506,20 @@ class MemberController extends Controller
         $search = $request->input('search');
         $user = auth()->user();
 
-        $query = Member::where('is_lakut', true)
-            ->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                    ->orWhereHas('pac', function ($q) use ($search) {
-                        $q->where('pac', 'like', "%$search%");
-                    });
+        $query = Member::where('is_lakut', true)->where(function ($query) use ($search) {
+            $query->where('name', 'like', "%$search%")->orWhereHas('pac', function ($q) use ($search) {
+                $q->where('pac', 'like', "%$search%");
             });
+        });
 
         if ($user->role_id == 3) {
             $query->where('pac_id', $user->pac_id);
         }
 
-        $lakutCadres = $query->with('pac')->latest()->paginate(10);
+        $lakutCadres = $query
+            ->with('pac')
+            ->latest()
+            ->paginate(10);
         return view('admins.members.lakut', compact('lakutCadres', 'search'));
     }
 
@@ -540,19 +528,20 @@ class MemberController extends Controller
         $search = $request->input('search');
         $user = auth()->user();
 
-        $query = Member::where('is_latinpel', true)
-            ->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                    ->orWhereHas('pac', function ($q) use ($search) {
-                        $q->where('pac', 'like', "%$search%");
-                    });
+        $query = Member::where('is_latinpel', true)->where(function ($query) use ($search) {
+            $query->where('name', 'like', "%$search%")->orWhereHas('pac', function ($q) use ($search) {
+                $q->where('pac', 'like', "%$search%");
             });
+        });
 
         if ($user->role_id == 3) {
             $query->where('pac_id', $user->pac_id);
         }
 
-        $latinpelCadres = $query->with('pac')->latest()->paginate(10);
+        $latinpelCadres = $query
+            ->with('pac')
+            ->latest()
+            ->paginate(10);
         return view('admins.members.latinpel', compact('latinpelCadres', 'search'));
     }
 
@@ -572,12 +561,11 @@ class MemberController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $membersQuery->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%$search%")
-                    ->orWhere('gender', 'LIKE', "%$search%");
+                $q->where('name', 'LIKE', "%$search%")->orWhere('gender', 'LIKE', "%$search%");
             });
 
             // Jika hasil pencarian kosong, set pesan error
-            if (!$membersQuery->exists()) {
+            if (! $membersQuery->exists()) {
                 $message = "Hasil pencarian tidak ditemukan untuk: \"$search\".";
             }
         }

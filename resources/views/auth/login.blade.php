@@ -19,7 +19,7 @@
                 <div class="row g-0">
                     <div class="col-md-6 d-none d-md-block">
                         <img
-                            src="{{ asset('storage/images/bglogin.png') }}"
+                            src="{{ asset('assets/images/bglogin.png') }}"
                             class="img-fluid rounded-start h-100"
                             style="object-fit: cover"
                             alt="Login Image"

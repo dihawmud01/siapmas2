@@ -5,7 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/js/app.js',
+            input: [
+                'resources/js/app.js',
                 'resources/css/app.css',
                 'resources/css/admin.css',
                 'resources/css/calendar.css',
@@ -15,7 +16,10 @@ export default defineConfig({
                 'resources/js/plugins/apexcharts.js',
                 'resources/js/plugins/echarts.js',
                 'resources/js/plugins/purecounter.js',
-                'resources/js/plugins/swiper.js'],
+                'resources/js/plugins/alpine.js',
+                'resources/js/plugins/swiper.js',
+                'resources/js/plugins/glightbox.js',
+            ],
             refresh: true,
         }),
     ],

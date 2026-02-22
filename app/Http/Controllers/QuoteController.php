@@ -21,24 +21,25 @@ class QuoteController extends Controller
     }
 
     public function storeQuote(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    $quotes = $request->all();
+        $quotes = $request->all();
 
-    if ($request->hasFile('img')) {
-        $file = $request->file('img');
-        $newFileName = 'quotes_' . $request->name . '_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $newFileName =
+                'quotes_' . $request->name . '_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
 
-        // Simpan ke storage/app/public/images
-        $file->storeAs('images', $newFileName, 'public');
+            // Simpan ke storage/app/public/images
+            $file->storeAs('images', $newFileName, 'public');
 
-        // Simpan nama file ke kolom img
-        $quotes['img'] = $newFileName;
-    }
+            // Simpan nama file ke kolom img
+            $quotes['img'] = $newFileName;
+        }
         $quotes = Quote::create($quotes);
         Alert::success('Mantap Sahabat', 'Quote Berhasil Ditambahkan');
 
@@ -55,19 +56,17 @@ class QuoteController extends Controller
         $quoteToUpdate = Quote::findOrFail($id);
 
         $quoteData = $request->all();
-        if ($request->img) {
-            $extension = $request->img->getClientOriginalExtension();
-            $newFileName = 'quotes_update' . '_' . $request->name . '-' . now()->timestamp . '.' . $extension;
-            if ($request->hasFile('img')) {
-                $file = $request->file('img');
-                $newFileName = 'gambar_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
-                $file->move(storage_path('app/public/images'), $newFileName);
-                $data['img'] = $newFileName; // jika kamu simpan ke database
-            } else {
-                // Optional: handle jika tidak ada file
-                // Misalnya log atau kasih nilai default
-            }
-
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $newFileName =
+                'quotes_update' .
+                '_' .
+                $request->name .
+                '-' .
+                now()->timestamp .
+                '.' .
+                $file->getClientOriginalExtension();
+            $file->move(storage_path('app/public/images'), $newFileName);
             $quoteData['img'] = $newFileName;
         }
 

@@ -55,7 +55,7 @@
                                                 </label>
                                                 <div class="col-md-8 col-lg-9">
                                                     <img
-                                                            src="{{ asset('storage/images/profile-images.jpg') }}"
+                                                            src="{{ asset('assets/images/default.png') }}"
                                                             alt="Profile"
                                                     />
                                                     <div class="pt-2">

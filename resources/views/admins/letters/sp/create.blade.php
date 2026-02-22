@@ -14,41 +14,48 @@
     $pacName = $user && $user->pac ? $user->pac->pac : 'PAC Tidak Diketahui';
 @endphp
 
-
 @section('content')
-    <x-breadcrumb :values="[
-        __('Surat-menyurat'),
-        __('Pengajuan Surat Pengesahan (SP)'),
-        __('Buat Pengajuan'),
-        strtoupper(request()->query('type')),
-    ]"></x-breadcrumb>
-
+    <x-breadcrumb
+        :values="[
+            __('Surat-menyurat'),
+            __('Pengajuan Surat Pengesahan (SP)'),
+            __('Buat Pengajuan'),
+            strtoupper(request()->query('type')),
+        ]"
+    ></x-breadcrumb>
 
     <div class="card">
         <div class="card-header bg-transparent">
             <div class="d-flex align-items-center p-4">
                 <div class="d-flex flex-column w-100">
-                    <h3 class="fw-bold">{{ __('Form Pengajuan Surat Pengesahan PAC/PR/PK') }} -
-                        {{ strtoupper(request()->query('type')) }}</h3>
+                    <h3 class="fw-bold">
+                        {{ __('Form Pengajuan Surat Pengesahan PAC/PR/PK') }} -
+                        {{ strtoupper(request()->query('type')) }}
+                    </h3>
                 </div>
             </div>
         </div>
 
         <div class="card-body p-4">
-            <form method="POST"
+            <form
+                method="POST"
                 action="{{ route('dashboard.letters.validation-submission.store', ['type' => request()->query('type') === 'ippnu' ? 'IPPNU' : 'IPNU']) }}"
-                enctype="multipart/form-data" x-data="{
+                enctype="multipart/form-data"
+                x-data="{
                     step: 1,
+                    orgLevel: 'PAC',
                     errors: {},
                     waPhone: '{{ $adminPcPhone }}',
                     pacName: '{{ $pacName }}',
                     validateStep1() {
                         this.errors = {}
-                
+
                         let fields = [
                             'type',
+                            'organization_level',
                             'event_date',
                             'event_location',
+                            'pelantikan_date',
                             'documentation',
                             'request_letter',
                             'mwc_recommendation',
@@ -59,7 +66,18 @@
                             'id_cv_photo_certificate',
                             'management_structure',
                         ]
-                
+
+                        // Validate sub_organization_name if PR or PK
+                        if (this.orgLevel !== 'PAC') {
+                            let subOrgInput = document.querySelector(
+                                `[name='sub_organization_name']`,
+                            )
+                            if (subOrgInput && subOrgInput.value.trim() === '') {
+                                this.errors['sub_organization_name'] =
+                                    'Field ini wajib diisi untuk PR/PK.'
+                            }
+                        }
+
                         fields.forEach((name) => {
                             let input = document.querySelector(`[name='${name}']`)
                             if (input) {
@@ -71,14 +89,14 @@
                                 }
                             }
                         })
-                
+
                         if (Object.keys(this.errors).length === 0) {
                             this.step = 2
                         }
                     },
                     validateStep2() {
                         this.errors = {}
-                
+
                         let fields = [
                             'start_period',
                             'end_period',
@@ -105,11 +123,11 @@
                             'brigade_institution_director',
                             'brigade_institution_members',
                         ]
-                
+
                         fields.forEach((name) => {
                             let input = document.querySelector(`[name='${name}']`)
                             let inputJSON = document.querySelector(`[name='${name}[]']`)
-                
+
                             if (
                                 (input && input.value.trim() === '') ||
                                 (inputJSON && inputJSON.value.trim() === '')
@@ -117,7 +135,7 @@
                                 this.errors[name] = 'Field ini wajib diisi.'
                             }
                         })
-                
+
                         if (Object.keys(this.errors).length === 0) {
                             Swal.fire({
                                 title: 'Apakah Anda yakin ingin mengirim data ini?',
@@ -151,25 +169,116 @@
                                         buttonsStyling: false,
                                     }).then((reminderResult) => {
                                         if (reminderResult.isConfirmed) {
-                                            const phone = '6285701929518'; // Ganti dengan nomor admin PC (tanpa +)
-                                            const pacName = '{{ $pacName }}';
-                                            const message = encodeURIComponent(`Assalamu'alaikum wr wb, saya telah mengirimkan pengajuan SP untuk ${pacName}. Terima kasih`);
-                                            const waUrl = `https://wa.me/${phone}?text=${message}`;
-                                            window.open(waUrl, '_blank');
+                                            const phone = '6285701929518' // Ganti dengan nomor admin PC (tanpa +)
+                                            const pacName = '{{ $pacName }}'
+                                            const message = encodeURIComponent(
+                                                `Assalamu'alaikum wr wb, saya telah mengirimkan pengajuan SP untuk ${pacName}. Terima kasih`,
+                                            )
+                                            const waUrl = `https://wa.me/${phone}?text=${message}`
+                                            window.open(waUrl, '_blank')
                                         }
-                
+
                                         // Submit form setelah proses WA (tetap submit meskipun pilih kirim WA atau tidak)
-                                        document.querySelector('form').submit();
-                                    });
+                                        document.querySelector('form').submit()
+                                    })
                                 }
-                
                             })
                         }
                     },
-                }">
+                }"
+            >
                 @csrf
 
                 <div class="row" x-show="step === 1">
+                    <div class="my-4 px-5">
+                        <h3 class="fw-semibold">{{ __('Tingkat Organisasi & Lampiran') }}</h3>
+                    </div>
+
+                    {{-- Organization Level Selection --}}
+                    <div class="col-12 mb-4 px-5">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <label class="form-label fw-semibold">
+                                    {{ __('Tingkat Organisasi') }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex flex-wrap gap-4">
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="organization_level"
+                                            id="org_pac"
+                                            value="PAC"
+                                            x-model="orgLevel"
+                                            checked
+                                        />
+                                        <label class="form-check-label" for="org_pac">
+                                            <strong>PAC</strong>
+                                            (Pimpinan Anak Cabang)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="organization_level"
+                                            id="org_pr"
+                                            value="PR"
+                                            x-model="orgLevel"
+                                        />
+                                        <label class="form-check-label" for="org_pr">
+                                            <strong>PR</strong>
+                                            (Pimpinan Ranting)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="organization_level"
+                                            id="org_pk"
+                                            value="PK"
+                                            x-model="orgLevel"
+                                        />
+                                        <label class="form-check-label" for="org_pk">
+                                            <strong>PK</strong>
+                                            (Pimpinan Komisariat)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Sub Organization Name (only for PR/PK) --}}
+                    <div class="col-12 mb-4 px-5" x-show="orgLevel === 'PR' || orgLevel === 'PK'" x-transition>
+                        <p
+                            x-show="errors.sub_organization_name"
+                            class="text-danger mb-1 text-end"
+                            x-text="errors.sub_organization_name"
+                        ></p>
+                        <label class="form-label fw-semibold">
+                            <span x-show="orgLevel === 'PR'">{{ __('Nama Ranting') }}</span>
+                            <span x-show="orgLevel === 'PK'">{{ __('Nama Komisariat') }}</span>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="sub_organization_name"
+                            class="form-control"
+                            :placeholder="orgLevel === 'PR' ? 'Contoh: Desa Karangsalam' : 'Contoh: MAN 1 Banyumas'"
+                        />
+                        <small class="text-muted">
+                            <span x-show="orgLevel === 'PR'">
+                                Masukkan nama desa/kelurahan untuk Pimpinan Ranting
+                            </span>
+                            <span x-show="orgLevel === 'PK'">
+                                Masukkan nama sekolah/lembaga untuk Pimpinan Komisariat
+                            </span>
+                        </small>
+                    </div>
+
                     <div class="my-4 px-5">
                         <h3 class="fw-semibold">{{ __('Lampiran-lampiran') }}</h3>
                     </div>
@@ -195,6 +304,16 @@
                             label="{{ __('Tempat Pelaksanaan Konferancab/Rapat Anggota') }}"
                             type="text"
                         />
+
+                        <p
+                            x-show="errors.pelantikan_date"
+                            class="text-danger mb-1 text-end"
+                            x-text="errors.pelantikan_date"
+                        ></p>
+                        <x-input-form name="pelantikan_date" label="{{ __('Tanggal Pelantikan') }}" type="date" />
+                        <small class="text-muted d-block mb-3" style="margin-top: -0.75rem">
+                            Tanggal ini digunakan sebagai tanggal penetapan SP. SP berlaku 2 tahun sejak pelantikan.
+                        </small>
 
                         <p
                             x-show="errors.documentation"
@@ -241,6 +360,16 @@
                             label="{{ __('No. Surat Rekomendasi dari MWC NU/PR NU Setempat') }}"
                             type="text"
                         />
+                        <p
+                            x-show="errors.mwc_letter_date"
+                            class="text-danger mb-1 text-end"
+                            x-text="errors.mwc_letter_date"
+                        ></p>
+                        <x-input-form
+                            name="mwc_letter_date"
+                            label="{{ __('Tanggal Surat Rekomendasi dari MWC NU/PR NU Setempat') }}"
+                            type="date"
+                        />
                     </div>
 
                     <div class="col-md-6 mt-3 px-5">
@@ -255,6 +384,30 @@
                             type="file"
                             accept="application/pdf"
                         />
+
+                        {{-- PAC Letter Number (for PR/PK) --}}
+                        <div x-show="orgLevel === 'PR' || orgLevel === 'PK'" x-transition class="mt-3">
+                            <p
+                                x-show="errors.pac_letter_number"
+                                class="text-danger mb-1 text-end"
+                                x-text="errors.pac_letter_number"
+                            ></p>
+                            <x-input-form
+                                name="pac_letter_number"
+                                label="{{ __('No. Surat Rekomendasi PAC Setempat') }}"
+                                type="text"
+                            />
+                            <p
+                                x-show="errors.pac_letter_date"
+                                class="text-danger mb-1 text-end"
+                                x-text="errors.pac_letter_date"
+                            ></p>
+                            <x-input-form
+                                name="pac_letter_date"
+                                label="{{ __('Tanggal Surat Rekomendasi PAC Setempat') }}"
+                                type="date"
+                            />
+                        </div>
 
                         <p
                             x-show="errors.election_report"
@@ -313,153 +466,296 @@
                 </div>
 
                 <div class="container">
-    <div class="row" x-show="step === 2">
-        <div class="col-12">
-            <h3 class="fw-semibold my-5 px-3">{{ __('Susunan Pengurus') }}</h3>
-        </div>
+                    <div class="row" x-show="step === 2">
+                        <div class="col-12">
+                            <h3 class="fw-semibold my-5 px-3">{{ __('Susunan Pengurus') }}</h3>
+                        </div>
 
-        <div class="col-12 col-md-6 mb-4 px-3">
-            <div class="mb-5">
-                <p x-show="errors.start_period" class="text-danger mb-1 text-end" x-text="errors.start_period"></p>
-                <x-input-form name="start_period" label="{{ __('Tahun Mulai Masa Khidmat') }}" type="number" min="1900" max="2100" />
+                        {{-- Masa Khidmat --}}
+                        <div class="col-12 mb-4 px-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header border-bottom bg-white py-3">
+                                    <h5 class="fw-bold text-dark mb-0">
+                                        {{ __('Masa Khidmat') }}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p
+                                                x-show="errors.start_period"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.start_period"
+                                            ></p>
+                                            <x-input-form
+                                                name="start_period"
+                                                label="{{ __('Tahun Mulai') }}"
+                                                type="number"
+                                                min="1900"
+                                                max="2100"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p
+                                                x-show="errors.end_period"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.end_period"
+                                            ></p>
+                                            <x-input-form
+                                                name="end_period"
+                                                label="{{ __('Tahun Berakhir') }}"
+                                                type="number"
+                                                min="1900"
+                                                max="2100"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <p x-show="errors.end_period" class="text-danger mb-1 text-end" x-text="errors.end_period"></p>
-                <x-input-form name="end_period" label="{{ __('Tahun Berakhir Masa Khidmat') }}" type="number" min="1900" max="2100" />
-            </div>
+                        {{-- Pelindung & Pembina --}}
+                        <div class="col-12 col-md-6 mb-4 px-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-header border-bottom bg-white py-3">
+                                    <h5 class="fw-bold text-dark mb-0">
+                                        {{ __('Pelindung') }}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p
+                                        x-show="errors.protectors"
+                                        class="text-danger mb-1 text-end"
+                                        x-text="errors.protectors"
+                                    ></p>
+                                    <x-input-json
+                                        name="protectors"
+                                        label="{{ __('Nama Pelindung') }}"
+                                        count="10"
+                                        layout="vertical"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-4 px-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-header border-bottom bg-white py-3">
+                                    <h5 class="fw-bold text-dark mb-0">
+                                        {{ __('Pembina') }}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p
+                                        x-show="errors.advisors"
+                                        class="text-danger mb-1 text-end"
+                                        x-text="errors.advisors"
+                                    ></p>
+                                    <x-input-json
+                                        name="advisors"
+                                        label="{{ __('Nama Pembina') }}"
+                                        count="10"
+                                        layout="vertical"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="mb-5">
-                <p x-show="errors.protectors" class="text-danger mb-1 text-end" x-text="errors.protectors"></p>
-                <x-input-json name="protectors" label="{{ __('Pelindung') }}" count="10" />
+                        {{-- Pengurus Harian --}}
+                        <div class="col-12 mb-4 px-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header border-bottom bg-white py-3">
+                                    <h5 class="fw-bold text-dark mb-0">
+                                        {{ __('Pengurus Harian') }}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.chairman"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.chairman"
+                                            ></p>
+                                            <x-input-form
+                                                name="chairman"
+                                                label="{{ __('Ketua') }}"
+                                                type="text"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.secretary"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.secretary"
+                                            ></p>
+                                            <x-input-form
+                                                name="secretary"
+                                                label="{{ __('Sekretaris') }}"
+                                                type="text"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.treasurer"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.treasurer"
+                                            ></p>
+                                            <x-input-form
+                                                name="treasurer"
+                                                label="{{ __('Bendahara') }}"
+                                                type="text"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.vice_chairmen"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.vice_chairmen"
+                                            ></p>
+                                            <x-input-json
+                                                name="vice_chairmen"
+                                                label="{{ __('Wakil Ketua') }}"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.vice_secretaries"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.vice_secretaries"
+                                            ></p>
+                                            <x-input-json
+                                                name="vice_secretaries"
+                                                label="{{ __('Wakil Sekretaris') }}"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-3">
+                                            <p
+                                                x-show="errors.vice_treasurers"
+                                                class="text-danger mb-1 text-end"
+                                                x-text="errors.vice_treasurers"
+                                            ></p>
+                                            <x-input-json
+                                                name="vice_treasurers"
+                                                label="{{ __('Wakil Bendahara') }}"
+                                                layout="vertical"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <p x-show="errors.advisors" class="text-danger mb-1 text-end" x-text="errors.advisors"></p>
-                <x-input-json name="advisors" label="{{ __('Pembina') }}" count="10" />
-            </div>
+                        {{-- Departemen-departemen (2 kolom) --}}
+                        @php
+                            $departments = [
+                                ['key' => 'organization_department', 'label' => 'Departemen Organisasi', 'role' => 'coordinator'],
+                                ['key' => 'cadre_department', 'label' => 'Departemen Kaderisasi', 'role' => 'coordinator'],
+                                ['key' => 'dakwah_department', 'label' => 'Departemen Dakwah', 'role' => 'coordinator'],
+                                ['key' => 'culture_department', 'label' => 'Departemen Olahraga, Seni, & Budaya', 'role' => 'coordinator'],
+                            ];
+                        @endphp
 
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Pengurus Harian') }}</h5>
+                        @foreach ($departments as $dept)
+                            <div class="col-12 col-md-6 mb-4 px-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-header border-bottom bg-white py-3">
+                                        <h5 class="fw-bold text-dark mb-0">
+                                            {{ __($dept['label']) }}
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p
+                                            x-show="errors.{{ $dept['key'] }}_coordinator"
+                                            class="text-danger mb-1 text-end"
+                                            x-text="errors.{{ $dept['key'] }}_coordinator"
+                                        ></p>
+                                        <x-input-form
+                                            name="{{ $dept['key'] }}_coordinator"
+                                            label="{{ __('Koordinator') }}"
+                                            type="text"
+                                            layout="vertical"
+                                        />
+                                        <p
+                                            x-show="errors.{{ $dept['key'] }}_members"
+                                            class="text-danger mb-1 text-end"
+                                            x-text="errors.{{ $dept['key'] }}_members"
+                                        ></p>
+                                        <x-input-json
+                                            name="{{ $dept['key'] }}_members"
+                                            label="{{ __('Anggota') }}"
+                                            layout="vertical"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        {{-- Lembaga-lembaga (3 kolom) --}}
+                        @php
+                            $institutions = [
+                                ['key' => 'economy_institution', 'label' => 'Lembaga Ekonomi & Kewirausahaan', 'role' => 'director'],
+                                ['key' => 'press_institution', 'label' => 'Lembaga Pers & Penerbitan', 'role' => 'director'],
+                                ['key' => 'brigade_institution', 'label' => 'Lembaga Corps Brigade Pembangunan', 'role' => 'director'],
+                            ];
+                        @endphp
+
+                        @foreach ($institutions as $inst)
+                            <div class="col-12 col-md-4 mb-4 px-3">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-header border-bottom bg-white py-3">
+                                        <h5 class="fw-bold text-dark mb-0" style="font-size: 0.95rem">
+                                            {{ __($inst['label']) }}
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p
+                                            x-show="errors.{{ $inst['key'] }}_director"
+                                            class="text-danger mb-1 text-end"
+                                            x-text="errors.{{ $inst['key'] }}_director"
+                                        ></p>
+                                        <x-input-form
+                                            name="{{ $inst['key'] }}_director"
+                                            label="{{ __('Direktur') }}"
+                                            type="text"
+                                            layout="vertical"
+                                        />
+                                        <p
+                                            x-show="errors.{{ $inst['key'] }}_members"
+                                            class="text-danger mb-1 text-end"
+                                            x-text="errors.{{ $inst['key'] }}_members"
+                                        ></p>
+                                        <x-input-json
+                                            name="{{ $inst['key'] }}_members"
+                                            label="{{ __('Anggota') }}"
+                                            layout="vertical"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="col-12 px-3">
+                            <div
+                                class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 p-4"
+                            >
+                                <button type="button" class="btn btn-secondary btn-lg" @click="step = 1">
+                                    <i class="bi bi-chevron-left"></i>
+                                    {{ __('Sebelumnya') }}
+                                </button>
+                                <button type="button" class="btn btn-success btn-lg" @click="validateStep2()">
+                                    {{ __('Kirim') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <p x-show="errors.chairman" class="text-danger mb-1 text-end" x-text="errors.chairman"></p>
-                <x-input-form name="chairman" label="{{ __('Ketua') }}" type="text" />
-
-                <p x-show="errors.vice_chairmen" class="text-danger mb-1 text-end" x-text="errors.vice_chairmen"></p>
-                <x-input-json name="vice_chairmen" label="{{ __('Wakil Ketua') }}" />
-
-                <p x-show="errors.secretary" class="text-danger mb-1 text-end" x-text="errors.secretary"></p>
-                <x-input-form name="secretary" label="{{ __('Sekretaris') }}" type="text" />
-
-                <p x-show="errors.vice_secretaries" class="text-danger mb-1 text-end" x-text="errors.vice_secretaries"></p>
-                <x-input-json name="vice_secretaries" label="{{ __('Wakil Sekretaris') }}" />
-
-                <p x-show="errors.treasurer" class="text-danger mb-1 text-end" x-text="errors.treasurer"></p>
-                <x-input-form name="treasurer" label="{{ __('Bendahara') }}" type="text" />
-
-                <p x-show="errors.vice_treasurers" class="text-danger mb-1 text-end" x-text="errors.vice_treasurers"></p>
-                <x-input-json name="vice_treasurers" label="{{ __('Wakil Bendahara') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Departemen Organisasi') }}</h5>
-                </div>
-
-                <p x-show="errors.organization_department_coordinator" class="text-danger mb-1 text-end" x-text="errors.organization_department_coordinator"></p>
-                <x-input-form name="organization_department_coordinator" label="{{ __('Koordinator') }}" type="text" />
-
-                <p x-show="errors.organization_department_members" class="text-danger mb-1 text-end" x-text="errors.organization_department_members"></p>
-                <x-input-json name="organization_department_members" label="{{ __('Anggota') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Departemen Kaderisasi') }}</h5>
-                </div>
-
-                <p x-show="errors.cadre_department_coordinator" class="text-danger mb-1 text-end" x-text="errors.cadre_department_coordinator"></p>
-                <x-input-form name="cadre_department_coordinator" label="{{ __('Koordinator') }}" type="text" />
-
-                <p x-show="errors.cadre_department_members" class="text-danger mb-1 text-end" x-text="errors.cadre_department_members"></p>
-                <x-input-json name="cadre_department_members" label="{{ __('Anggota') }}" />
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6 mb-4 px-3">
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Departemen Dakwah') }}</h5>
-                </div>
-
-                <p x-show="errors.dakwah_department_coordinator" class="text-danger mb-1 text-end" x-text="errors.dakwah_department_coordinator"></p>
-                <x-input-form name="dakwah_department_coordinator" label="{{ __('Koordinator') }}" type="text" />
-
-                <p x-show="errors.dakwah_department_members" class="text-danger mb-1 text-end" x-text="errors.dakwah_department_members"></p>
-                <x-input-json name="dakwah_department_members" label="{{ __('Anggota') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Departemen Olahraga, Seni, dan Budaya') }}</h5>
-                </div>
-
-                <p x-show="errors.culture_department_coordinator" class="text-danger mb-1 text-end" x-text="errors.culture_department_coordinator"></p>
-                <x-input-form name="culture_department_coordinator" label="{{ __('Koordinator') }}" type="text" />
-
-                <p x-show="errors.culture_department_members" class="text-danger mb-1 text-end" x-text="errors.culture_department_members"></p>
-                <x-input-json name="culture_department_members" label="{{ __('Anggota') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Lembaga Ekonomi dan Kewirausahaan') }}</h5>
-                </div>
-
-                <p x-show="errors.economy_institution_director" class="text-danger mb-1 text-end" x-text="errors.economy_institution_director"></p>
-                <x-input-form name="economy_institution_director" label="{{ __('Direktur') }}" type="text" />
-
-                <p x-show="errors.economy_institution_members" class="text-danger mb-1 text-end" x-text="errors.economy_institution_members"></p>
-                <x-input-json name="economy_institution_members" label="{{ __('Anggota') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Lembaga Pers dan Penerbitan') }}</h5>
-                </div>
-
-                <p x-show="errors.press_institution_director" class="text-danger mb-1 text-end" x-text="errors.press_institution_director"></p>
-                <x-input-form name="press_institution_director" label="{{ __('Direktur') }}" type="text" />
-
-                <p x-show="errors.press_institution_members" class="text-danger mb-1 text-end" x-text="errors.press_institution_members"></p>
-                <x-input-json name="press_institution_members" label="{{ __('Anggota') }}" />
-            </div>
-
-            <div class="mb-5">
-                <div class="border-bottom mb-3">
-                    <h5 class="fw-semibold">{{ __('Lembaga Corps Brigade Pembangunan') }}</h5>
-                </div>
-
-                <p x-show="errors.brigade_institution_director" class="text-danger mb-1 text-end" x-text="errors.brigade_institution_director"></p>
-                <x-input-form name="brigade_institution_director" label="{{ __('Direktur') }}" type="text" />
-
-                <p x-show="errors.brigade_institution_members" class="text-danger mb-1 text-end" x-text="errors.brigade_institution_members"></p>
-                <x-input-json name="brigade_institution_members" label="{{ __('Anggota') }}" />
-            </div>
-        </div>
-
-        <div class="col-12 px-3">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center p-4 gap-3">
-                <button type="button" class="btn btn-secondary btn-lg" @click="step = 1">
-                    <i class="bi bi-chevron-left"></i>
-                    {{ __('Sebelumnya') }}
-                </button>
-                <button type="button" class="btn btn-success btn-lg" @click="validateStep2()">
-                    {{ __('Kirim') }}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
             </form>
         </div>
     </div>

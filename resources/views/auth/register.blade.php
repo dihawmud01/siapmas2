@@ -32,7 +32,7 @@
                                             object-fit: cover;
                                             border-radius: 1rem 0 0 1rem;
                                         "
-                                        src="{{ asset('storage/images/login2.jpg') }}"
+                                        src="{{ asset('assets/images/bglogin.png') }}"
                                         alt="{{ __('login form') }}"
                                         class="img-fluid"
                                     />
@@ -49,7 +49,7 @@
                                                 <span class="h1 fw-bold mb-4">
                                                     <img
                                                         style="width: 100px; height: 100px; object-fit: cover"
-                                                        src="{{ asset('storage/images/logokomi.png') }}"
+                                                        src="{{ asset('assets/images/logokomi.png') }}"
                                                         alt=""
                                                     />
                                                 </span>

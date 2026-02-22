@@ -28,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
             \URL::forceScheme('https');
         }
 
+        if (env('APP_ENV') !== 'local') {
+            URL::forceScheme('https');
+        }
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            \URL::forceScheme('https');
+        }
         SP::observe(SPObserver::class);
     }
 }

@@ -12,6 +12,7 @@ class InputForm extends Component
     public ?string $value;
     public bool $required;
     public ?int $min, $max;
+    public string $layout;
 
     /**
      * Create a new component instance.
@@ -27,6 +28,7 @@ class InputForm extends Component
         bool $required = true,
         ?int $min = null,
         ?int $max = null,
+        string $layout = 'horizontal',
     ) {
         $this->name = $name;
         $this->label = $label;
@@ -38,6 +40,7 @@ class InputForm extends Component
         $this->min = $min;
         $this->max = $max;
         $this->id = $id;
+        $this->layout = $layout;
     }
 
     /**

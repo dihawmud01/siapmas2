@@ -43,39 +43,41 @@ class NewsController extends Controller
         return view('admins.news.create', compact('categories', 'tags'));
     }
 
-   public function store(Request $request): RedirectResponse
-{
-    // Tambahkan validasi di sini
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'content' => 'required',
-        'category_id' => 'required|exists:categories,id',
-        'img' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-    ], [
-        'img.required' => 'Silakan upload gambar terlebih dahulu.',
-        'img.image' => 'File harus berupa gambar.',
-        'img.mimes' => 'Format gambar harus jpg, jpeg, atau png.',
-        'img.max' => 'Ukuran gambar maksimal 2MB.',
-    ]);
+    public function store(Request $request): RedirectResponse
+    {
+        // Tambahkan validasi di sini
+        $request->validate(
+            [
+                'title' => 'required|string|max:255',
+                'content' => 'required',
+                'category_id' => 'required|exists:categories,id',
+                'img' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            ],
+            [
+                'img.required' => 'Silakan upload gambar terlebih dahulu.',
+                'img.image' => 'File harus berupa gambar.',
+                'img.mimes' => 'Format gambar harus jpg, jpeg, atau png.',
+                'img.max' => 'Ukuran gambar maksimal 2MB.',
+            ],
+        );
 
-    $data = $request->all();
-    $data['user_id'] = Auth::user()->id;
+        $data = $request->all();
+        $data['user_id'] = Auth::user()->id;
 
-    if ($request->img) {
-        $extension = $request->img->getClientOriginalExtension();
-        $newFileName = $request->title . '_' . 'PC_IPNU_IPPNU_BANYUMAS' . '-' . now()->timestamp . '.' . $extension;
-        $request->file('img')->move(public_path('/storage/images'), $newFileName);
-        $data['img'] = $newFileName;
+        if ($request->img) {
+            $extension = $request->img->getClientOriginalExtension();
+            $newFileName = $request->title . '_' . 'PC_IPNU_IPPNU_BANYUMAS' . '-' . now()->timestamp . '.' . $extension;
+            $request->file('img')->move(storage_path('app/public/images'), $newFileName);
+            $data['img'] = $newFileName;
+        }
+
+        $news = News::create($data);
+        $news->tags()->sync($request->tags);
+
+        return redirect()
+            ->route('news.index')
+            ->with('success', 'News created successfully!');
     }
-
-    $news = News::create($data);
-    $news->tags()->sync($request->tags);
-
-    return redirect()
-        ->route('news.index')
-        ->with('success', 'News created successfully!');
-    }
-
 
     /**
      * Show the form for editing the specified resource.
@@ -108,7 +110,7 @@ class NewsController extends Controller
         if ($request->img) {
             $extension = $request->img->getClientOriginalExtension();
             $newFileName = 'news' . '_' . $request->nama . '-' . now()->timestamp . '.' . $extension;
-            $request->file('img')->move(public_path('/storage/images'), $newFileName);
+            $request->file('img')->move(storage_path('app/public/images'), $newFileName);
             $data['img'] = $newFileName;
         }
 

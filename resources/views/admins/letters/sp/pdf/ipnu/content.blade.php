@@ -6,7 +6,7 @@
         <style>
             @page {
                 size: 215.91mm 330.22mm;
-                margin: 5cm 1.5cm 2cm 1.5cm;
+                margin: 3.5cm 1.5cm 0.8cm 1.5cm; /* Reduced margins particularly bottom */
             }
 
             .header,
@@ -14,16 +14,17 @@
                 position: fixed;
                 right: 0;
                 left: 0;
+                z-index: -1; /* Place behind text */
             }
 
             .header {
-                top: -4cm;
+                top: -3.1cm; /* Lowered slightly from -3.3cm */
                 width: 100%;
                 text-align: center;
             }
 
             .footer {
-                bottom: -1.5cm;
+                bottom: -0.5cm; /* Raised from -1.2cm to be visible */
                 width: 40%;
                 text-align: left;
             }
@@ -42,10 +43,12 @@
                 text-align: justify;
             }
 
-
             .main-title {
                 display: inline-block;
                 position: relative;
+                border-bottom: 1.5pt solid #000;
+                background-color: #fff;
+                padding: 0 8px;
                 font-weight: bold;
                 font-size: 11pt;
                 text-align: center;
@@ -61,7 +64,7 @@
             }
 
             .letter-number {
-                margin-bottom: 15px;
+                margin-bottom: 5px; /* Reduced from 8px */
                 font-size: 11pt;
                 text-align: center;
             }
@@ -77,11 +80,19 @@
             .secondary-title {
                 position: relative;
                 align-items: center;
-                /*border-bottom: 2px solid #1e1e1e;*/
+                background-color: #fff;
+                padding: 0 8px;
                 font-weight: bold;
                 font-size: 11pt;
                 text-align: center;
                 text-transform: uppercase;
+            }
+
+            .title-with-background {
+                display: inline-block;
+                margin: 0;
+                background-color: #fff;
+                padding: 0 2px;
             }
 
             .section-title {
@@ -89,7 +100,7 @@
             }
 
             .latin-arabic {
-                margin-top: 8px;
+                margin-top: 4px; /* Reduced from 8px */
                 font-style: italic;
             }
 
@@ -99,16 +110,16 @@
             }
 
             .attachment-title {
-                margin-bottom: 12px;
+                margin-bottom: 6px; /* Reduced from 12px */
                 font-style: italic;
             }
 
             .attachment-subtitle {
-                margin-top: 8px;
+                margin-top: 5px; /* Reduced from 8px */
             }
 
             .attachment-content {
-                margin-top: 12px;
+                margin-top: 6px; /* Reduced from 12px */
             }
 
             .decision {
@@ -118,7 +129,7 @@
             }
 
             .date {
-                margin-top: 20px;
+                margin-top: 5px; /* DRASTICALLY Reduced from 20px */
             }
 
             .date-table {
@@ -143,32 +154,35 @@
             .signature-table td {
                 position: relative;
                 vertical-align: middle;
+                padding: 0;
                 width: 50%;
                 text-align: center;
             }
 
             .signature-space {
                 display: block;
-                min-height: 20px;
+                min-height: 55px; /* Reduced from 65px */
             }
 
             .chairman-signature-img {
                 display: block;
                 opacity: 0.9;
-                margin: -33px auto -28px 0;
-                height: auto;
-                max-height: 60px;
-        }
+                margin: -10px auto -5px 0;
+                width: auto;
+                height: 80px; /* Kept as requested */
+            }
 
             .secretary-signature-img {
                 display: block;
                 opacity: 0.9;
-                margin: -53px auto -28px -88px;
-                height: 150px;
+                /* Adjusted to account for stamp */
+                margin: -10px auto -5px 0;
+                width: auto;
+                height: 80px; /* Matched with chairman */
             }
 
             .bordered-td {
-                padding-top: 20px;
+                padding-top: 15px; /* Reduced padding */
                 font-weight: bold;
             }
 
@@ -188,29 +202,75 @@
                 padding: 0;
                 list-style: none;
             }
+
+            .double-line {
+                margin: 5px 0; /* Reduced from 10px */
+                border-top: 1px double #000;
+                width: 100%;
+                line-height: 0.1;
+                text-align: center;
+            }
+
+            /* Aggressive spacing reduction */
+            p {
+                margin-bottom: 0; /* Zero margin */
+            }
+
+            .content-table td {
+                padding-bottom: 0; /* Zero padding */
+            }
+
+            .latin-arabic {
+                margin-top: 2px;
+                margin-bottom: 2px;
+            }
         </style>
     </head>
 
     <body>
         <div class="header">
-            <img src="{{ asset('assets/images/sp/ipnu/header.png') }}" alt="Header" />
+            <img src="data:image/png;base64,{{ $headerImg }}" alt="Header" />
         </div>
 
         <div style="text-align: center">
+            <br />
             <div class="main-title">SURAT PENGESAHAN PC IPNU</div>
             <div class="letter-number">Nomor: {{ $letter->letter_number }}</div>
         </div>
 
         <div class="about">Tentang</div>
-        <div class="secondary-title" style="padding-bottom: 4px">
-            SUSUNAN PENGURUS
-            <br />
-            PIMPINAN ANAK CABANG
-            <br />
-            IKATAN PELAJAR NAHDLATUL ULAMA {{ $pac }}
-            <br />
-            MASA KHIDMAT {{ $letter->start_period . '-' . $letter->end_period }}
-        </div>
+
+        @if ($letter->organization_level->value === 'PR' || $letter->organization_level->value === 'PK')
+            <div class="secondary-title" style="padding-bottom: 4px">
+                SUSUNAN PENGURUS
+                <br />
+                <span class="title-with-background">{{ strtoupper($orgLabel) }}</span>
+                <br />
+                IKATAN PELAJAR NAHDLATUL ULAMA
+                <br />
+
+                @if ($letter->organization_level->value === 'PR')
+                    {{ str_starts_with(strtoupper($coverOrgName), 'DESA ') || str_starts_with(strtoupper($coverOrgName), 'KELURAHAN ') ? strtoupper($coverOrgName) : 'DESA ' . strtoupper($coverOrgName) }}
+                    KECAMATAN {{ strtoupper($pacNameRaw) }}
+                @else
+                    {{ strtoupper($coverOrgName) }} KECAMATAN {{ strtoupper($pacNameRaw) }}
+                @endif
+                <br />
+                MASA KHIDMAT {{ $letter->start_period }}-{{ $letter->end_period }}
+            </div>
+        @else
+            <div class="secondary-title" style="padding-bottom: 4px">
+                SUSUNAN PENGURUS
+                <br />
+                {{ strtoupper($orgLabel) }}
+                <br />
+                IKATAN PELAJAR NAHDLATUL ULAMA
+                <br />
+                {{ strtoupper($coverOrgName) }}
+                <br />
+                MASA KHIDMAT {{ $letter->start_period }}-{{ $letter->end_period }}
+            </div>
+        @endif
         <div class="secondary-title" style="margin: 5px auto"></div>
 
         <div class="content">
@@ -264,18 +324,34 @@
                     <td class="section-content">
                         <div>
                             <ol>
-                                <li>
-                                    Konferensi Anak Cabang IPNU
-                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }}
-                                    tanggal {{ $letter->formatted_event_date_without_day }};
-                                </li>
-                                <li>
-                                    Surat Rekomendasi MWC NU
-                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }} Nomor:
-                                    {{ $letter->mwc_letter_number }} tanggal
-                                    {{ $letter->formatted_event_date_without_day }};
-                                </li>
-                                <li>Berita Acara Pemilihan Ketua dan Tim Formatur.</li>
+                                @if ($letter->organization_level->value === 'PAC')
+                                    <li>
+                                        Konferensi Anak Cabang IPNU
+                                        {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }}
+                                        tanggal {{ $letter->formatted_event_date_without_day }};
+                                    </li>
+                                    <li>
+                                        Surat Rekomendasi MWC NU
+                                        {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }}
+                                        Nomor: {{ $letter->mwc_letter_number }} tanggal
+                                        {{ $letter->formatted_mwc_letter_date ?? $letter->formatted_event_date_without_day }};
+                                    </li>
+                                @else
+                                    <li>
+                                        Surat Rekomendasi
+                                        {{ $letter->organization_level->value === 'PR' ? 'PRNU' : 'Pimpinan' }}
+                                        {{ ucwords(strtolower($subOrgName)) }},
+                                        {{ ucwords(strtolower($pac)) }}
+                                        Nomor : {{ $letter->mwc_letter_number }} tanggal
+                                        {{ $letter->formatted_mwc_letter_date ?? $letter->formatted_event_date_without_day }};
+                                    </li>
+                                    <li>
+                                        Surat Rekomendasi PAC IPNU {{ ucwords(strtolower($pac)) }} Nomor :
+                                        {{ $letter->pac_letter_number }} tanggal
+                                        {{ $letter->formatted_pac_letter_date ?? $letter->formatted_event_date_without_day }};
+                                    </li>
+                                @endif
+                                <li>Berita Acara Pemilihan Ketua dan Rapat Tim Formatur.</li>
                             </ol>
                         </div>
                     </td>
@@ -292,16 +368,16 @@
                         <div>
                             <ol>
                                 <li>
-                                    Mengesahkan susunan Pimpinan Anak Cabang Ikatan Pelajar Nahdlatul Ulama
-                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }}, Masa
-                                    Khidmat {{ $letter->start_period . '-' . $letter->end_period }} sebagaimana
+                                    Mengesahkan susunan {{ $orgLabel }} Ikatan Pelajar Nahdlatul Ulama
+                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($coverOrgName))) }},
+                                    Masa Khidmat {{ $letter->start_period . '-' . $letter->end_period }} sebagaimana
                                     terlampir;
                                 </li>
                                 <li>
-                                    Menugaskan kepada semua pengurus Pimpinan Anak Cabang Ikatan Pelajar Nahdlatul Ulama
-                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }} untuk
-                                    melaksanakan amanat organisasi, sesuai hasil keputusan konferensi dan peraturan yang
-                                    ada;
+                                    Menugaskan kepada semua pengurus {{ $orgLabel }} Ikatan Pelajar Nahdlatul Ulama
+                                    {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($coverOrgName))) }}
+                                    untuk melaksanakan amanat organisasi, sesuai hasil keputusan
+                                    {{ strtolower($eventType) }} dan peraturan yang ada;
                                 </li>
                                 <li>
                                     Surat Pengesahan ini berlaku mulai tanggal ditetapkan sampai dengan tanggal
@@ -315,92 +391,98 @@
             </table>
 
             <p class="latin-arabic">Wallahulmuwaffiq ilaa aqwamith-tharieq</p>
-            <div class="date">
-                <table class="date-table">
-                    <tr>
-                        <td width="50%"></td>
-                        <td width="88px"><p class="col-1">Ditetapkan di</p></td>
-                        <td width="8px"><p class="bracket-pair">:</p></td>
-                        <td width="128px"><p>Purwokerto</p></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td><p class="col-1">Pada tanggal</p></td>
-                        <td><p class="bracket-pair">:</p></td>
-                        <td class="bordered-td" style="padding: 0">
-                            <p style="width: 100%; font-weight: normal; padding: 0">
-                                {{ $letter->formatted_generated_hijri_date }}
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                            <p style="width: 100%">{{ $letter->formatted_generated_georgia_date }}</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            <div style="page-break-inside: avoid; padding-top: 15px">
+                <div class="date">
+                    <table class="date-table">
+                        <tr>
+                            <td width="50%"></td>
+                            <td width="88px"><p class="col-1">Ditetapkan di</p></td>
+                            <td width="8px"><p class="bracket-pair">:</p></td>
+                            <td width="128px"><p>Purwokerto</p></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><p class="col-1">Pada tanggal</p></td>
+                            <td><p class="bracket-pair">:</p></td>
+                            <td class="bordered-td" style="padding: 0">
+                                <p style="width: 100%; font-weight: normal; padding: 0">
+                                    {{ $letter->formatted_pelantikan_hijri_date }}
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <p style="width: 100%">{{ $letter->formatted_pelantikan_georgia_date }}</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
-            <div class="signature">
-                <p>
-                    <strong>PIMPINAN CABANG</strong>
-                    <br />
-                    <strong>IKATAN PELAJAR NAHDLATUL ULAMA</strong>
-                    <br />
-                    <strong>KABUPATEN BANYUMAS</strong>
-                </p>
-                <table class="signature-table">
-                    <tr>
-                        <td><p>Ketua,</p></td>
-                        <td><p>Sekretaris,</p></td>
-                    </tr>
-                    <tr>
-                        <td class="bordered-td">
-                            <div class="signature-space">
-                                <img
-                                    src="{{ asset('assets/images/sp/signatures/chairman-signature.png') }}"
-                                    class="chairman-signature-img"
-                                    alt="Tanda Tangan Ketua"
-                                />
-                            </div>
-                            <p><strong>FAHMI ABDURRAHMAN</strong></p>
-                        </td>
-                        <td class="bordered-td">
-                            <div class="signature-space">
-                                <img
-                                    src="{{ asset('assets/images/sp/signatures/secretary-signature.png') }}"
-                                    class="secretary-signature-img"
-                                    alt="Tanda Tangan Sekretaris"
-                                />
-                            </div>
-                            <p><strong>AKHMAD AINUN NAJIB</strong></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><p>NIA. 11.20.99.00002</p></td>
-                        <td><p>NIA. 11.20.99.00032</p></td>
-                    </tr>
-                </table>
-            </div>
+                <div class="signature">
+                    <p>
+                        <strong>PIMPINAN CABANG</strong>
+                        <br />
+                        <strong>IKATAN PELAJAR NAHDLATUL ULAMA</strong>
+                        <br />
+                        <strong>KABUPATEN BANYUMAS</strong>
+                    </p>
+                    <table class="signature-table">
+                        <tr>
+                            <td><p>Ketua,</p></td>
+                            <td><p>Sekretaris,</p></td>
+                        </tr>
+                        <tr>
+                            <td class="bordered-td">
+                                <div class="signature-space">
+                                    <img
+                                        src="data:image/png;base64,{{ $chairSig }}"
+                                        class="chairman-signature-img"
+                                        alt="Tanda Tangan Ketua"
+                                        style="height: 80px"
+                                    />
+                                </div>
+                                <p><strong>FAHMI ABDURRAHMAN</strong></p>
+                            </td>
+                            <td class="bordered-td">
+                                <div class="signature-space">
+                                    <img
+                                        src="data:image/png;base64,{{ $secSig }}"
+                                        class="secretary-signature-img"
+                                        alt="Tanda Tangan Sekretaris"
+                                        style="height: 80px"
+                                    />
+                                </div>
+                                <p><strong>AKHMAD AINUN NAJIB</strong></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><p>NIA. 11.20.99.00002</p></td>
+                            <td><p>NIA. 11.20.99.00032</p></td>
+                        </tr>
+                    </table>
+                </div>
 
-            <p>Ditembuskan kepada</p>
-            <ol>
-                <li>Yth. Pengurus Cabang NU Kabupaten Banyumas;</li>
-                <li>
-                    Yth. Pengurus MWC NU {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }};
-                </li>
-                <li>Arsip</li>
-            </ol>
+                <p style="margin-top: 5px">Ditembuskan kepada</p>
+                <ol>
+                    <li>Yth. Pengurus Cabang NU Kabupaten Banyumas;</li>
+                    <li>
+                        Yth. Pengurus MWC NU
+                        {{ str_replace(['Uin', 'Unu'], ['UIN', 'UNU'], ucwords(strtolower($pac))) }};
+                    </li>
+                    <li>Arsip</li>
+                </ol>
+            </div>
         </div>
 
         <div class="footer">
-            <img src="{{ asset('assets/images/sp/ipnu/footer.jpeg') }}" alt="Footer" />
+            <img src="data:image/jpeg;base64,{{ $footerImg }}" alt="Footer" />
         </div>
 
-        <div class="attachment">
+        <div class="attachment" style="page-break-before: always">
+            <br />
             <p class="attachment-title">
                 Lampiran Surat Pengesahan
                 <br />
@@ -408,16 +490,42 @@
                 <br />
                 Nomor: {{ $letter->letter_number }}
             </p>
-            <div class="secondary-title" style="padding-bottom: 4px">
-                SUSUNAN PENGURUS
-                <br />
-                PIMPINAN ANAK CABANG
-                <br/>
-                IKATAN PELAJAR NAHDLATUL ULAMA {{ $pac }}
-                <br />
-                MASA KHIDMAT {{ $letter->start_period . '-' . $letter->end_period }}
-            </div>
+            @if ($letter->organization_level->value === 'PR' || $letter->organization_level->value === 'PK')
+                <div class="secondary-title" style="padding-bottom: 4px">
+                    SUSUNAN PENGURUS
+                    <br />
+                    <span class="title-with-background">{{ strtoupper($orgLabel) }}</span>
+                    <br />
+                    IKATAN PELAJAR NAHDLATUL ULAMA
+                    <br />
+
+                    @if ($letter->organization_level->value === 'PR')
+                        {{ str_starts_with(strtoupper($coverOrgName), 'DESA ') || str_starts_with(strtoupper($coverOrgName), 'KELURAHAN ') ? strtoupper($coverOrgName) : 'DESA ' . strtoupper($coverOrgName) }}
+                        KECAMATAN {{ strtoupper($pacNameRaw) }}
+                    @else
+                        {{ strtoupper($coverOrgName) }} KECAMATAN {{ strtoupper($pacNameRaw) }}
+                    @endif
+                    <br />
+                    MASA KHIDMAT {{ $letter->start_period }}-{{ $letter->end_period }}
+                </div>
+            @else
+                <div class="secondary-title" style="padding-bottom: 4px">
+                    SUSUNAN PENGURUS
+                    <br />
+                    {{ strtoupper($orgLabel) }}
+                    <br />
+                    IKATAN PELAJAR NAHDLATUL ULAMA
+                    <br />
+                    {{ strtoupper($coverOrgName) }}
+                    <br />
+                    MASA KHIDMAT {{ $letter->start_period }}-{{ $letter->end_period }}
+                </div>
+            @endif
             <div class="secondary-title" style="margin-top: 5px; margin-bottom: 10px"></div>
+            <div style="margin-top: 5px; margin-bottom: 5px; padding: 0">
+                <div style="border-top: 3px double black; width: 100%; height: 5px"></div>
+            </div>
+
             <div class="attachment-content">
                 <table class="content-table">
                     <tr>
@@ -484,7 +592,7 @@
 
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>Sekretaris</strong></p>
                         </td>
                         <td><p>:</p></td>
@@ -505,7 +613,7 @@
 
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>Bendahara</strong></p>
                         </td>
                         <td><p>:</p></td>
@@ -526,7 +634,7 @@
 
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="attachment-subtitle"><strong>DEPARTEMEN-DEPARTEMEN</strong></p>
                         </td>
                     </tr>
@@ -560,7 +668,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>B. Departemen Kaderisasi</strong></p>
                         </td>
                     </tr>
@@ -589,7 +697,7 @@
 
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>C. Departemen Dakwah</strong></p>
                         </td>
                     </tr>
@@ -617,7 +725,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>D. Departemen Olahraga, Seni, dan Budaya</strong></p>
                         </td>
                     </tr>
@@ -646,7 +754,7 @@
 
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="attachment-subtitle"><strong>LEMBAGA-LEMBAGA</strong></p>
                         </td>
                     </tr>
@@ -679,7 +787,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position"><strong>B. Lembaga Pers dan Penerbitan</strong></p>
                         </td>
                     </tr>
@@ -698,7 +806,7 @@
                                 @endforeach
                             @else
                                 <ol>
-                                    @foreach ($letter->ress_institution_members as $member)
+                                    @foreach ($letter->press_institution_members as $member)
                                         <li><p>{{ $member }}</p></li>
                                     @endforeach
                                 </ol>
@@ -707,7 +815,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <br/>
+                            <br />
                             <p class="position">
                                 <strong>
                                     C. Lembaga Corps Brigade Pembangunan
@@ -732,7 +840,7 @@
                                 @endforeach
                             @else
                                 <ol>
-                                    @foreach ($letter->ress_institution_members as $member)
+                                    @foreach ($letter->press_institution_members as $member)
                                         <li><p>{{ $member }}</p></li>
                                     @endforeach
                                 </ol>
@@ -742,8 +850,11 @@
                 </table>
             </div>
 
-            <div class="date">
+            <div class="date" style="margin-top: 5px">
+                <br />
+                <br />
                 <table class="date-table">
+                    <br />
                     <tr>
                         <td width="50%"></td>
                         <td width="88px"><p class="col-1">Ditetapkan di</p></td>
@@ -756,7 +867,7 @@
                         <td><p class="bracket-pair">:</p></td>
                         <td class="bordered-td" style="padding: 0">
                             <p style="width: 100%; font-weight: normal; padding: 0">
-                                {{ $letter->formatted_generated_hijri_date }}
+                                {{ $letter->formatted_pelantikan_hijri_date }}
                             </p>
                         </td>
                     </tr>
@@ -765,7 +876,7 @@
                         <td></td>
                         <td></td>
                         <td>
-                            <p style="width: 100%">{{ $letter->formatted_generated_georgia_date }}</p>
+                            <p style="width: 100%">{{ $letter->formatted_pelantikan_georgia_date }}</p>
                         </td>
                     </tr>
                 </table>
@@ -788,7 +899,7 @@
                         <td class="bordered-td">
                             <div class="signature-space">
                                 <img
-                                    src="{{ asset('assets/images/sp/signatures/chairman-signature.png') }}"
+                                    src="{{ public_path('assets/images/sp/signatures/chairman-signature.png') }}"
                                     class="chairman-signature-img"
                                     alt="Tanda Tangan Ketua"
                                 />
@@ -798,7 +909,7 @@
                         <td class="bordered-td">
                             <div class="signature-space">
                                 <img
-                                    src="{{ asset('assets/images/sp/signatures/secretary-signature.png') }}"
+                                    src="data:image/png;base64,{{ $secSig }}"
                                     class="secretary-signature-img"
                                     alt="Tanda Tangan Sekretaris"
                                 />

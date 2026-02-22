@@ -29,31 +29,32 @@ class AdministratorController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    $administrators = $request->all();
+        $administrators = $request->all();
 
-    if ($request->hasFile('img')) {
-        $file = $request->file('img');
-        $newFileName = 'administrators_' . $request->name . '_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $newFileName =
+                'administrators_' . $request->name . '_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
 
-        // Simpan ke storage/app/public/images
-        $file->storeAs('images', $newFileName, 'public');
+            // Simpan ke storage/app/public/images
+            $file->storeAs('images', $newFileName, 'public');
 
-        // Simpan nama file ke kolom img
-        $administrators['img'] = $newFileName;
+            // Simpan nama file ke kolom img
+            $administrators['img'] = $newFileName;
+        }
+
+        Administrator::create($administrators);
+
+        Alert::success('Mantap Sahabat', 'Administrator Berhasil Ditambahkan');
+
+        return redirect()->route('administrators.index');
     }
-
-    Administrator::create($administrators);
-
-    Alert::success('Mantap Sahabat', 'Administrator Berhasil Ditambahkan');
-
-    return redirect()->route('administrators.index');
-}
 
     public function edit($id, Request $request)
     {
@@ -67,19 +68,17 @@ class AdministratorController extends Controller
         $administratorToUpdate = Administrator::findOrFail($id);
 
         $administratorData = $request->all();
-        if ($request->img) {
-            $extension = $request->img->getClientOriginalExtension();
-            $newFileName = 'administrator_update' . '_' . $request->name . '-' . now()->timestamp . '.' . $extension;
-            if ($request->hasFile('img')) {
-                $file = $request->file('img');
-                $newFileName = 'gambar_' . now()->timestamp . '.' . $file->getClientOriginalExtension();
-                $file->move(storage_path('app/public/images'), $newFileName);
-                $data['img'] = $newFileName; // jika kamu simpan ke database
-            } else {
-                // Optional: handle jika tidak ada file
-                // Misalnya log atau kasih nilai default
-            }
-
+        if ($request->hasFile('img')) {
+            $file = $request->file('img');
+            $newFileName =
+                'administrator_update' .
+                '_' .
+                $request->name .
+                '-' .
+                now()->timestamp .
+                '.' .
+                $file->getClientOriginalExtension();
+            $file->move(storage_path('app/public/images'), $newFileName);
             $administratorData['img'] = $newFileName;
         }
 

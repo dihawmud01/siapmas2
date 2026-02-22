@@ -12,16 +12,23 @@ class InputJson extends Component
     public string $name;
     public int $count;
     public array $values;
+    public string $layout;
 
     /**
      * Create a new component instance.
      */
-    public function __construct(string $label, string $name, int $count = 5, array $values = [])
-    {
+    public function __construct(
+        string $label,
+        string $name,
+        int $count = 5,
+        array $values = [],
+        string $layout = 'horizontal',
+    ) {
         $this->name = $name;
         $this->label = $label;
         $this->count = intval($count);
         $this->values = is_array($values) ? $values : [];
+        $this->layout = $layout;
     }
 
     /**

@@ -92,7 +92,7 @@ class AgendaController extends Controller
         if ($request->pamphlet) {
             $extension = $request->pamphlet->getClientOriginalExtension();
             $newFileName = 'agenda' . '_' . $request->organizer . '-' . now()->timestamp . '.' . $extension;
-            $request->file('pamphlet')->move(public_path('/storage/images'), $newFileName);
+            $request->file('pamphlet')->move(storage_path('app/public/images'), $newFileName);
             $events['pamphlet'] = $newFileName;
         }
 
@@ -109,9 +109,10 @@ class AgendaController extends Controller
         $event = Agenda::find($id);
 
         // Jika tidak ditemukan, redirect dengan pesan error
-        if (!$event) {
-            return redirect()->route('admin.calendar.index')
-                            ->with('error', 'Agenda tidak ditemukan');
+        if (! $event) {
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('error', 'Agenda tidak ditemukan');
         }
 
         // Format 'date' untuk ditampilkan dalam input 'datetime-local'
@@ -158,9 +159,6 @@ class AgendaController extends Controller
         return view('admins.calendar.edit', compact('event', 'organizers', 'categories'));
     }
 
-
-
-
     public function update($id, Request $request)
     {
         $eventToUpdate = Agenda::findOrFail($id);
@@ -170,7 +168,7 @@ class AgendaController extends Controller
         if ($request->hasFile('pamphlet')) {
             $extension = $request->pamphlet->getClientOriginalExtension();
             $newFileName = 'agenda_' . $request->organizer . '-' . now()->timestamp . '.' . $extension;
-            $request->file('pamphlet')->move(public_path('/storage/images'), $newFileName);
+            $request->file('pamphlet')->move(storage_path('app/public/images'), $newFileName);
             $event['pamphlet'] = $newFileName;
         }
 
@@ -183,27 +181,27 @@ class AgendaController extends Controller
         return redirect()->route('admin.calendar.index');
     }
 
-
     public function destroy($id)
-{
-    $event = Agenda::find($id);
+    {
+        $event = Agenda::find($id);
 
-    if (!$event) {
-        return redirect()->route('admin.calendar.index')
-                         ->with('error', 'Agenda tidak ditemukan');
+        if (! $event) {
+            return redirect()
+                ->route('admin.calendar.index')
+                ->with('error', 'Agenda tidak ditemukan');
+        }
+
+        // Hapus file pamflet jika ada
+        if ($event->pamphlet && file_exists(storage_path('app/public/images/' . $event->pamphlet))) {
+            unlink(storage_path('app/public/images/' . $event->pamphlet));
+        }
+
+        $event->delete();
+
+        Alert::success('Mantap Rekan', 'Agenda Berhasil Dihapus');
+
+        return redirect()->route('admin.calendar.index');
     }
-
-    // Hapus file pamflet jika ada
-    if ($event->pamphlet && file_exists(public_path('/storage/images/' . $event->pamphlet))) {
-        unlink(public_path('/storage/images/' . $event->pamphlet));
-    }
-
-    $event->delete();
-
-    Alert::success('Mantap Rekan', 'Agenda Berhasil Dihapus');
-
-    return redirect()->route('admin.calendar.index');
-}
 
     public function getEvents()
     {
@@ -219,19 +217,19 @@ class AgendaController extends Controller
         return response()->json($events);
     }
 
-
     private function getCategoryColor($category)
     {
         $colors = [
-            'Seminar' => '#007bff',  // Biru
+            'Seminar' => '#007bff', // Biru
             'Workshop' => '#28a745', // Hijau
             'Kompetisi' => '#ffc107', // Kuning
-            'Lainnya' => '#dc3545',  // Merah
+            'Lainnya' => '#dc3545', // Merah
         ];
 
         return $colors[$category] ?? '#6c757d'; // Default abu-abu jika tidak ada kategori
     }
-    public function getFull(){
+    public function getFull()
+    {
         return view('users.calendar_full');
     }
 }

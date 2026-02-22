@@ -23,7 +23,20 @@
 
                             <dt class="col-sm-8 fs-5">{{ __('Pilihan Pengajuan') }}</dt>
                             <dd class="col-sm-4 fs-5 text-end">{{ strtoupper($letter->type) }}</dd>
-                            
+
+                            <dt class="col-sm-8 fs-5">{{ __('Tingkat Organisasi') }}</dt>
+                            <dd class="col-sm-4 fs-5 text-end">
+                                @if ($letter->organization_level)
+                                    {{ $letter->organization_level->label() }}
+                                    @if ($letter->sub_organization_name)
+                                        <br />
+                                        <small class="text-muted">({{ $letter->sub_organization_name }})</small>
+                                    @endif
+                                @else
+                                    {{ __('PAC') }}
+                                @endif
+                            </dd>
+
                             <dt class="col-sm-8 fs-5">{{ __('Pengirim (Asal PAC)') }}</dt>
                             <dd class="col-sm-4 fs-5 text-end">
                                 @if ($letter->user->pac_id == 28 || $letter->user->pac_id == 29)
@@ -43,6 +56,33 @@
                             <dd class="col-sm-4 fs-5 text-end">
                                 {{ $letter->start_period . '-' . $letter->end_period }}
                             </dd>
+
+                            @if ($letter->pelantikan_date)
+                                <dt class="col-sm-8 fs-5">{{ __('Tanggal Pelantikan') }}</dt>
+                                <dd class="col-sm-4 fs-5 text-end">{{ $letter->formatted_pelantikan_date }}</dd>
+                            @endif
+
+                            @if ($letter->mwc_letter_number)
+                                <dt class="col-sm-8 fs-5">
+                                    {{ $letter->organization_level->value === 'PR' ? __('No. Surat Rekomendasi PRNU') : __('No. Surat Rekomendasi MWC NU') }}
+                                </dt>
+                                <dd class="col-sm-4 fs-5 text-end">{{ $letter->mwc_letter_number }}</dd>
+                                @if ($letter->mwc_letter_date)
+                                    <dt class="col-sm-8 fs-5">
+                                        {{ $letter->organization_level->value === 'PR' ? __('Tanggal Surat Rekomendasi PRNU') : __('Tanggal Surat Rekomendasi MWC NU') }}
+                                    </dt>
+                                    <dd class="col-sm-4 fs-5 text-end">{{ $letter->formatted_mwc_letter_date }}</dd>
+                                @endif
+                            @endif
+
+                            @if ($letter->pac_letter_number)
+                                <dt class="col-sm-8 fs-5">{{ __('No. Surat Rekomendasi PAC') }}</dt>
+                                <dd class="col-sm-4 fs-5 text-end">{{ $letter->pac_letter_number }}</dd>
+                                @if ($letter->pac_letter_date)
+                                    <dt class="col-sm-8 fs-5">{{ __('Tanggal Surat Rekomendasi PAC') }}</dt>
+                                    <dd class="col-sm-4 fs-5 text-end">{{ $letter->formatted_pac_letter_date }}</dd>
+                                @endif
+                            @endif
                         </dl>
                     </div>
 
@@ -56,7 +96,7 @@
                                 <dt class="col-sm-10 fs-5 mb-2">
                                     <a
                                         target="_blank"
-                                        href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/documentations/' . $letter->id . '/' . $doc) }}"
+                                        href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/documentations/' . $letter->id . '/' . $doc) }}"
                                         class="text-success text-decoration-none fw-normal"
                                     >
                                         @switch($doc)
@@ -79,7 +119,7 @@
                                 </dt>
                                 <dd class="col-sm-2 fs-5 text-end">
                                     <a
-                                        href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/documentations/' . $letter->id . '/' . $doc) }}"
+                                        href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/documentations/' . $letter->id . '/' . $doc) }}"
                                         download
                                         class="btn btn-sm btn-success"
                                     >
@@ -91,7 +131,7 @@
                             <dt class="col-sm-10 fs-5 mb-2">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/request_letters/' . $letter->id . '/' . $attachments->request_letter) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/request_letters/' . $letter->id . '/' . $attachments->request_letter) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -100,7 +140,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/request_letters/' . $letter->id . '/' . $attachments->request_letter) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/request_letters/' . $letter->id . '/' . $attachments->request_letter) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >
@@ -111,7 +151,7 @@
                             <dt class="col-sm-10 fs-5 mb-2">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/mwc_recommendations/' . $letter->id . '/' . $attachments->mwc_recommendation) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/mwc_recommendations/' . $letter->id . '/' . $attachments->mwc_recommendation) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -120,7 +160,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/mwc_recommendations/' . $letter->id . '/' . $attachments->mwc_recommendation) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/mwc_recommendations/' . $letter->id . '/' . $attachments->mwc_recommendation) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >
@@ -131,7 +171,7 @@
                             <dt class="col-sm-10 fs-5 mb-2">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/pac_recommendations/' . $letter->id . '/' . $attachments->pac_recommendation) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/pac_recommendations/' . $letter->id . '/' . $attachments->pac_recommendation) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -140,7 +180,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/pac_recommendations/' . $letter->id . '/' . $attachments->pac_recommendation) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/pac_recommendations/' . $letter->id . '/' . $attachments->pac_recommendation) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >
@@ -151,7 +191,7 @@
                             <dt class="col-sm-10 fs-5 mb-2">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/election_reports/' . $letter->id . '/' . $attachments->election_report) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/election_reports/' . $letter->id . '/' . $attachments->election_report) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -160,7 +200,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/election_reports/' . $letter->id . '/' . $attachments->election_report) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/election_reports/' . $letter->id . '/' . $attachments->election_report) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >
@@ -171,7 +211,7 @@
                             <dt class="col-sm-10 fs-5">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/formation_reports/' . $letter->id . '/' . $attachments->formation_report) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/formation_reports/' . $letter->id . '/' . $attachments->formation_report) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -180,7 +220,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/formation_reports/' . $letter->id . '/' . $attachments->formation_report) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/formation_reports/' . $letter->id . '/' . $attachments->formation_report) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >
@@ -191,29 +231,31 @@
                             <dt class="col-sm-10 fs-5">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/management_structures/' . $letter->id . '/' . $attachments->management_structure) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/management_structures/' . $letter->id . '/' . $attachments->management_structure) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-text-fill text-primary"></i>
                                     {{ __('Susunan Pengurus Lengkap.' . pathinfo($attachments->management_structure, PATHINFO_EXTENSION)) }}
                                 </a>
                             </dt>
-<dd class="col-sm-2 fs-5 text-end">
-    <a
-        href="{{ route('download.structure', [
-            'pac' => strtolower($letter->user->pac->pac),
-            'id' => $letter->id,
-            'filename' => $attachments->management_structure
-        ]) }}"
-        class="btn btn-sm btn-success"
-    >
-        <i class="bi bi-download"></i>
-    </a>
-</dd>
+                            <dd class="col-sm-2 fs-5 text-end">
+                                <a
+                                    href="{{
+                                        route('download.structure', [
+                                            'pac' => \Illuminate\Support\Str::slug($letter->user->pac->pac),
+                                            'id' => $letter->id,
+                                            'filename' => $attachments->management_structure,
+                                        ])
+                                    }}"
+                                    class="btn btn-sm btn-success"
+                                >
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </dd>
                             <dt class="col-sm-10 fs-5">
                                 <a
                                     target="_blank"
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/id_cv_photo_certificates/' . $letter->id . '/' . $attachments->id_cv_photo_certificate) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/id_cv_photo_certificates/' . $letter->id . '/' . $attachments->id_cv_photo_certificate) }}"
                                     class="text-success text-decoration-none fw-normal"
                                 >
                                     <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
@@ -222,7 +264,7 @@
                             </dt>
                             <dd class="col-sm-2 fs-5 text-end">
                                 <a
-                                    href="{{ asset('storage/documents/letters/sp/' . strtolower($letter->user->pac->pac) . '/id_cv_photo_certificates/' . $letter->id . '/' . $attachments->id_cv_photo_certificate) }}"
+                                    href="{{ asset('storage/documents/letters/sp/' . \Illuminate\Support\Str::slug($letter->user->pac->pac) . '/id_cv_photo_certificates/' . $letter->id . '/' . $attachments->id_cv_photo_certificate) }}"
                                     download
                                     class="btn btn-sm btn-success"
                                 >

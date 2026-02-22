@@ -22,11 +22,12 @@
                     @if (in_array(auth()->user()->role_id, [3]))
                         <div class="d-flex align-items-center">
                             @php
-                                $isIPNU = request()->query('type') === 'ipnu';
-                                $generateRoute = $isIPNU 
-                                    ? route('dashboard.letters.validation-submission.generateIPNUSP', $letter) 
+                                $isIPNU = strtoupper($letter->type ?? '') === 'IPNU';
+                                $generateRoute = $isIPNU
+                                    ? route('dashboard.letters.validation-submission.generateIPNUSP', $letter)
                                     : route('dashboard.letters.validation-submission.generateIPPNUSP', $letter);
                             @endphp
+
                             <a
                                 href="{{ $letter->status->value == 'approved' ? $generateRoute : '' }}"
                                 class="{{ $letter->status->value == 'approved' ? '' : 'disabled-link' }}"
@@ -41,6 +42,17 @@
                                 </button>
                             </a>
 
+                            @if ($letter->status->value == 'rejected')
+                                <a
+                                    href="{{ route('dashboard.letters.validation-submission.edit', $letter->id) }}"
+                                    class="ms-2"
+                                >
+                                    <button class="btn btn-warning btn-lg text-white">
+                                        <i class="bi bi-pencil-square"></i>
+                                        {{ __('Revisi Pengajuan') }}
+                                    </button>
+                                </a>
+                            @endif
 
                             @if (request()->routeIs('dashboard.letters.validation-submission.index'))
                                 <div class="dropdown-center">
@@ -102,6 +114,7 @@
                                 >
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="rejection_reason" id="rejectionReason" />
                                     <button
                                         class="btn btn-danger btn-lg"
                                         type="button"
@@ -167,20 +180,34 @@
                                     });
                                     document.getElementById('rejectBtn').addEventListener('click', function (event) {
                                         Swal.fire({
-                                            title: 'Apakah Anda yakin ingin menolak pengajuan ini?',
+                                            title: 'Alasan Penolakan',
+                                            text: 'Silakan masukkan alasan mengapa pengajuan SP ini ditolak.',
+                                            input: 'textarea',
+                                            inputPlaceholder: 'Masukkan alasan penolakan di sini...',
+                                            inputAttributes: {
+                                                'aria-label': 'Masukkan alasan penolakan di sini',
+                                                required: true,
+                                            },
                                             icon: 'warning',
                                             showCancelButton: true,
-                                            cancelButtonText: 'Cek lagi',
-                                            confirmButtonText: 'Ya',
+                                            cancelButtonText: 'Batal',
+                                            confirmButtonText: 'Tolak Pengajuan',
                                             reverseButtons: true,
                                             customClass: {
                                                 cancelButton: 'btn btn-secondary btn-lg',
-                                                confirmButton: 'btn btn-success btn-lg',
+                                                confirmButton: 'btn btn-danger btn-lg',
                                                 actions: 'swal-custom-actions',
                                             },
                                             buttonsStyling: false,
+                                            preConfirm: (reason) => {
+                                                if (!reason || reason.trim() === '') {
+                                                    Swal.showValidationMessage('Alasan penolakan wajib diisi!');
+                                                }
+                                                return reason;
+                                            },
                                         }).then((result) => {
                                             if (result.isConfirmed) {
+                                                document.getElementById('rejectionReason').value = result.value;
                                                 document.getElementById('rejectionForm').submit();
                                             }
                                         });
@@ -213,6 +240,19 @@
                     </span>
                 @endif
             </p>
+
+            {{-- Organization Level Display --}}
+            @if ($letter->organization_level)
+                <p class="fs-5 mb-3">
+                    <strong>{{ __('Tingkat Organisasi: ') }}</strong>
+                    <span class="badge bg-primary text-light fs-6 fw-normal ms-2 p-2">
+                        {{ $letter->organization_level->label() }}
+                    </span>
+                    @if ($letter->sub_organization_name)
+                        <span class="text-dark ms-2">({{ $letter->sub_organization_name }})</span>
+                    @endif
+                </p>
+            @endif
         </div>
 
         @if (in_array(auth()->user()->role_id, [3]))
@@ -223,7 +263,12 @@
                 @elseif ($letter->status->value == 'approved')
                     {{ __('Pengajuan SP sudah disetujui oleh PC. SP sudah dapat digenerate') }}
                 @elseif ($letter->status->value == 'rejected')
-                    {{ __('Mohon maaf pengajuan SP anda ditolak oleh PC') }}
+                    <span class="d-block mb-1">
+                        {{ __('Mohon maaf pengajuan SP anda ditolak oleh PC dengan alasan:') }}
+                    </span>
+                    <div class="alert alert-danger mb-0 mt-2 p-3">
+                        {{ $letter->rejection_reason ?? 'Tidak ada alasan spesifik yang diberikan.' }}
+                    </div>
                 @endif
             </p>
         @endif

@@ -26,12 +26,12 @@
         <!-- loader -->
         {{--
             <div id="loader">
-            <images src="{{ asset('storage/images/logokomi.png') }}" alt="icon" class="loading-icon">
+            <images src="{{ asset('assets/images/logokomi.png') }}" alt="icon" class="loading-icon">
             </div>
         --}}
         <!-- * loader -->
 
-        {{-- <images style="width: 100px; height: 100px; object-fit:cover" src="{{ asset('storage/images/logokomi.png') }}" alt=""> --}}
+        {{-- <images style="width: 100px; height: 100px; object-fit:cover" src="{{ asset('assets/images/logokomi.png') }}" alt=""> --}}
 
         @yield('content')
         @include('mobile.partials.footer')

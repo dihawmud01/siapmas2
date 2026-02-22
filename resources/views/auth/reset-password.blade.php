@@ -19,7 +19,7 @@
                             <div class="row g-0">
                                 <div class="col-md-6 col-lg-5 d-none d-md-block">
                                     <img
-                                        src="{{ asset('storage/images/login2.jpg') }}"
+                                        src="{{ asset('assets/images/bglogin.png') }}"
                                         alt="form login"
                                         class="img-fluid"
                                         style="
@@ -41,7 +41,7 @@
                                                 <span class="h1 fw-bold mb-0">
                                                     <img
                                                         style="width: 100px; height: 100px; object-fit: cover"
-                                                        src="{{ asset('storage/images/logokomi.png') }}"
+                                                        src="{{ asset('assets/images/logokomi.png') }}"
                                                         alt=""
                                                     />
                                                 </span>

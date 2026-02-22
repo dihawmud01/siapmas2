@@ -63,84 +63,73 @@ class ProfileController extends Controller
     }
 
     public function update(ProfileUpdateRequest $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'bio' => 'required|string|max:255',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'required|string|max:255',
+        ]);
 
-    $user = Auth::user();
-    $user->fill(
-        $request->only([
-            'phone',
-            'x',
-            'fb',
-            'ig',
-            'bio',
-        ]),
-    );
-    // Handle profile image update
-    if ($request->input('remove_img') == '1') {
-        $user->photo = 'default.png';
-    
-    } elseif ($request->hasFile('images')) {
-        $file = $request->file('images');
-        $extension = $file->getClientOriginalExtension();
-        $newFileName = 'profile_' . $user->username . '-' . now()->timestamp . '.' . $extension;
-        // Buat folder user jika belum ada
-        $destinationPath = storage_path('app/public/images/user/photos/' . $user->id);
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
+        $user = Auth::user();
+        $user->fill($request->only(['phone', 'x', 'fb', 'ig', 'bio']));
+        // Handle profile image update
+        if ($request->input('remove_img') == '1') {
+            $user->photo = 'default.png';
+        } elseif ($request->hasFile('images')) {
+            $file = $request->file('images');
+            $extension = $file->getClientOriginalExtension();
+            $newFileName = 'profile_' . $user->username . '-' . now()->timestamp . '.' . $extension;
+            // Buat folder user jika belum ada
+            $destinationPath = storage_path('app/public/images/user/photos/' . $user->id);
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            // Simpan file ke folder yang sesuai
+            $file->move($destinationPath, $newFileName);
+
+            // Simpan nama file ke kolom 'photo'
+            $user->photo = $newFileName;
         }
 
-        // Simpan file ke folder yang sesuai
-        $file->move($destinationPath, $newFileName);
-    
-        // Simpan nama file ke kolom 'photo'
-        $user->photo = $newFileName;
+        // Save user details
+        $user->save();
+
+        Alert::success('Mantap Rekan/Rekanita', 'Profil Anda Sudah Diperbaharui');
+
+        return redirect()
+            ->route('profile')
+            ->with('users', $user);
     }
 
-// Save user details
-$user->save();
-
-Alert::success('Mantap Rekan/Rekanita', 'Profil Anda Sudah Diperbaharui');
-
-return redirect()
-    ->route('profile')
-    ->with('users', $user);
-}
-
-    
     public function store(Request $request): RedirectResponse
-{
-    // Validate incoming request
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'bio' => 'required|string|max:255',
-    ]);
+    {
+        // Validate incoming request
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'required|string|max:255',
+        ]);
 
-    $data = $request->all();
-    $data['user_id'] = Auth::user()->id;  // Assign logged-in user as the owner
+        $data = $request->all();
+        $data['user_id'] = Auth::user()->id; // Assign logged-in user as the owner
 
-    // Handle file upload for profile image
-    if ($request->hasFile('images')) {
-        $file = $request->file('images');
-        $extension = $file->getClientOriginalExtension();
-        $newFileName = 'profile_' . Auth::user()->username . '-' . now()->timestamp . '.' . $extension;
-        $file->storeAs('images', $newFileName, 'public');
-        $data['images'] = $newFileName;
+        // Handle file upload for profile image
+        if ($request->hasFile('images')) {
+            $file = $request->file('images');
+            $extension = $file->getClientOriginalExtension();
+            $newFileName = 'profile_' . Auth::user()->username . '-' . now()->timestamp . '.' . $extension;
+            $file->storeAs('images', $newFileName, 'public');
+            $data['images'] = $newFileName;
+        }
+
+        // Create a new user entry with the provided data
+        $user = User::create($data);
+
+        Alert::success('Mantap Rekan/Rekanita', 'Profil Baru Anda Berhasil Disimpan');
+
+        return redirect()
+            ->route('profile')
+            ->with('users', $user);
     }
-
-    // Create a new user entry with the provided data
-    $user = User::create($data);
-
-    Alert::success('Mantap Rekan/Rekanita', 'Profil Baru Anda Berhasil Disimpan');
-
-    return redirect()
-        ->route('profile')
-        ->with('users', $user);
-}
-
 
     public function showUploads(Request $request)
     {
@@ -191,7 +180,7 @@ return redirect()
         if ($request->img) {
             $extension = $request->img->getClientOriginalExtension();
             $newFileName = 'news' . '_' . $request->name . '-' . now()->timestamp . '.' . $extension;
-            $request->file('image')->move(public_path('/storage/images'), $newFileName);
+            $request->file('image')->move(storage_path('app/public/images'), $newFileName);
             $data['image'] = $newFileName;
         }
 
@@ -211,14 +200,14 @@ return redirect()
         if ($request->img) {
             $extension = $request->img->getClientOriginalExtension();
             $newFileName = 'libraries' . '_' . $request->name . '-' . now()->timestamp . '.' . $extension;
-            $request->file('image')->move(public_path('/storage/images'), $newFileName);
+            $request->file('image')->move(storage_path('app/public/images'), $newFileName);
             $library['image'] = $newFileName;
         }
 
         if ($request->pdf) {
             $extension = $request->pdf->getClientOriginalExtension();
             $newFileName = 'libraries' . '_' . $request->name . '-' . now()->timestamp . '.' . $extension;
-            $request->file('pdf')->move(public_path('/storage/pdf'), $newFileName);
+            $request->file('pdf')->move(storage_path('app/public/pdf'), $newFileName);
             $library['pdf'] = $newFileName;
         }
 

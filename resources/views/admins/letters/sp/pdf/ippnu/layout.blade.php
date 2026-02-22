@@ -63,11 +63,18 @@
         <div class="cover-container">
             <p class="cover-title">SURAT PENGESAHAN</p>
             <p class="cover-subtitle">
-                PIMPINAN ANAK CABANG
+                {{ strtoupper($orgLabel) }}
                 <br />
                 <span>IKATAN PELAJAR PUTRI NAHDLATUL ULAMA</span>
                 <br />
-                {{ $pac }}
+
+                @if ($letter->organization_level->value !== 'PAC')
+                    {{ $letter->organization_level->value === 'PR' ? 'RANTING ' : 'KOMISARIAT ' }}{{ strtoupper($subOrgName) }}
+                    <br />
+                    KECAMATAN {{ strtoupper($pacNameRaw) }}
+                @else
+                    {{ strtoupper($coverOrgName) }}
+                @endif
                 <br />
                 KABUPATEN BANYUMAS
                 <br />
@@ -75,7 +82,7 @@
             </p>
 
             <div class="logo">
-                <img src="{{ asset('assets/images/sp/ippnu/logo.png') }}" alt="Logo" />
+                <img src="data:image/png;base64,{{ $logoImg }}" alt="Logo" />
             </div>
 
             <p class="footer">

@@ -68,14 +68,14 @@ class LibraryController extends Controller
         if ($request->img) {
             $extension = $request->img->getClientOriginalExtension();
             $newFileName = $request->title . '_' . 'PC-IPNU-IPPNU-Banyumas' . '-' . now()->timestamp . '.' . $extension;
-            $request->file('img')->move(public_path('/storage/images'), $newFileName);
+            $request->file('img')->move(storage_path('app/public/images'), $newFileName);
             $library['img'] = $newFileName;
         }
 
         if ($request->pdf) {
             $extension = $request->pdf->getClientOriginalExtension();
             $newFileName = $request->title . '-' . 'PC-IPNU-IPPNU-Banyumas' . now()->timestamp . '.' . $extension;
-            $request->file('pdf')->move(public_path('/storage/pdf'), $newFileName);
+            $request->file('pdf')->move(storage_path('app/public/pdf'), $newFileName);
             $library['pdf'] = $newFileName;
         }
 
@@ -101,7 +101,7 @@ class LibraryController extends Controller
         if ($request->img) {
             $extension = $request->img->getClientOriginalExtension();
             $newFileName = 'quotes_update' . '_' . $request->title . '-' . now()->timestamp . '.' . $extension;
-            $request->file('images')->move(public_path('/storage/images'), $newFileName);
+            $request->file('images')->move(storage_path('app/public/images'), $newFileName);
             $libraryData['images'] = $newFileName;
         }
 
@@ -120,14 +120,14 @@ class LibraryController extends Controller
         $library = Library::findOrFail($id);
 
         if ($library->img) {
-            $imgPath = public_path() . $library->img;
+            $imgPath = storage_path('app/public/images/' . $library->img);
             if (File::exists($imgPath)) {
                 File::delete($imgPath);
             }
         }
 
         if ($library->pdf) {
-            $pdfPath = public_path() . $library->pdf;
+            $pdfPath = storage_path('app/public/pdf/' . $library->pdf);
             if (File::exists($pdfPath)) {
                 File::delete($pdfPath);
             }
