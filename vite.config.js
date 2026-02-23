@@ -19,6 +19,8 @@ export default defineConfig({
                 'resources/js/plugins/alpine.js',
                 'resources/js/plugins/swiper.js',
                 'resources/js/plugins/glightbox.js',
+                'resources/js/plugins/owl.carousel.js',
+                'resources/js/plugins/fullcalendar.js',
             ],
             refresh: true,
         }),
