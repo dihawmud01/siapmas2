@@ -21,19 +21,32 @@ jobs:
             - run: npm install
             - run: npm run build
 
-            # 3. Sinkronisasi (Upload) otomatis file ke Hosting via FTP
-            - name: 🚀 Sync files to Server
+            # 3. Sinkronisasi Ruang Kode (Core App) ke folder "siapmas"
+            - name: 🚀 Sync Core App to Server
               uses: SamKirkland/FTP-Deploy-Action@v4.3.5
               with:
                   server: ${{ secrets.FTP_SERVER }}
                   username: ${{ secrets.FTP_USERNAME }}
                   password: ${{ secrets.FTP_PASSWORD }}
-                  # Jangan hapus file penting server seperti folder storage dan konfigurasi environment env
-                  # File/Folder dalam list `exclude` di bawah ini TIDAK AKAN DITIMPA (Upload) dan TIDAK AKAN DIHAPUS
+                  server-dir: ${{ secrets.FTP_CORE_DIR }}
                   exclude: |
                       **/.git*
                       **/.git*/**
                       **/node_modules/**
                       .env
-                      storage/app/public/**
                       storage/logs/**
+                      public/**
+
+            # 4. Sinkronisasi Ruang Publik (Web Assets) ke folder "public_html"
+            - name: 🚀 Sync Public Assets to Server
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+              with:
+                  server: ${{ secrets.FTP_SERVER }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+                  local-dir: ./public/
+                  server-dir: ${{ secrets.FTP_PUBLIC_DIR }}
+                  exclude: |
+                      storage/**
+                      index.php
+                      build/manifest.json
