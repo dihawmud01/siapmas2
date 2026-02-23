@@ -1,4 +1,4 @@
-name: Deploy ke Shared Hosting via FTP
+name: Deploy via FTP to shared Hosting
 
 on:
     push:
