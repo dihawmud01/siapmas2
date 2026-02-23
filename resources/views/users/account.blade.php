@@ -184,19 +184,19 @@
                                             </div>
 
                                             <div class="row mb-3">
-                                                <label for="fullName" id="name" class="col-md-4 col-lg-3 col-form-label">
-                                                    {{ __('Username') }}
-                                                </label>
-                                                <div class="col-md-8 col-lg-9">
-                                                    <input
-                                                        name="fullName"
-                                                        type="text"
-                                                        class="form-control edit-profile"
-                                                        id="fullName"
-                                                        value="{{ $user->username }}"
-                                                        readonly
-                                                    />
-                                                </div>
+                                        <label for="fullName" id="name" class="col-md-4 col-lg-3 col-form-label">
+                                            {{ __('Username') }}
+                                        </label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input
+                                                name="fullName"
+                                                type="text"
+                                                class="form-control edit-profile bg-light text-secondary"
+                                                id="fullName"
+                                                value="{{ $user->username }}"
+                                                readonly
+                                            />
+                                        </div>
                                             </div>
 
                                             <!--<div class="row mb-3">-->
@@ -216,19 +216,19 @@
                                             <!--</div>-->
 
                                             <div class="row mb-3">
-                                                <label for="pac" class="col-md-4 col-lg-3 col-form-label">
-                                                    {{ __('PAC') }}
-                                                </label>
-                                                <div class="col-md-8 col-lg-9">
-                                                    <input
-                                                        name="pac"
-                                                        type="text"
-                                                        class="form-control edit-profile"
-                                                        id="pac"
-                                                        value="{{ optional($user->pac)->pac ?? '' }}"
-                                                        readonly
-                                                    />
-                                                </div>
+                                        <label for="pac" class="col-md-4 col-lg-3 col-form-label">
+                                            {{ __('PAC') }}
+                                        </label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input
+                                                name="pac"
+                                                type="text"
+                                                class="form-control edit-profile bg-light text-secondary"
+                                                id="pac"
+                                                value="{{ optional($user->pac)->pac ?? '' }}"
+                                                readonly
+                                            />
+                                        </div>
                                             </div>
                                             <!--<div class="row mb-3">-->
                                             <!--    <label for="level" class="col-md-4 col-lg-3 col-form-label">-->
@@ -377,23 +377,23 @@
 <!--                                            </div>-->
 
                                             <div class="row mb-3">
-                                                <label for="email" class="col-md-4 col-lg-3 col-form-label">
-                                                    {{ __('Email') }}
-                                                </label>
-                                                <div class="col-md-8 col-lg-9">
-                                                    <input
-                                                        name="email"
-                                                        type="email"
-                                                        class="form-control edit-profile mb-4"
-                                                        id="email"
-                                                        value="{{ $user->email }}"
-                                                        required
-                                                        readonly
-                                                    />
-                                                    <p class="text-danger m-0">
-                                                        {{ __('Pastikan semua data sudah terisi dengan benar') }}
-                                                    </p>
-                                                </div>
+                                        <label for="email" class="col-md-4 col-lg-3 col-form-label">
+                                            {{ __('Email') }}
+                                        </label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input
+                                                name="email"
+                                                type="email"
+                                                class="form-control edit-profile mb-4 bg-light text-secondary"
+                                                id="email"
+                                                value="{{ $user->email }}"
+                                                required
+                                                readonly
+                                            />
+                                            <p class="text-danger m-0">
+                                                {{ __('Pastikan semua data sudah terisi dengan benar') }}
+                                            </p>
+                                        </div>
                                             </div>
 
                                             <div class="text-end">
@@ -434,7 +434,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="tab-pane fade show active profile-edit pt-3" id="ChangePassword">
+                                    <div class="tab-pane fade pt-3" id="changePassword">
                                         <form method="POST" action="{{ route('change-password') }}">
                                             @csrf
                                             <div class="row mb-3">

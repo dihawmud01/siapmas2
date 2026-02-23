@@ -44,8 +44,10 @@ Route::get('/emails', function () {
     return view('mails.reset');
 });
 
-Route::get('/download/sp/{pac}/{id}/{filename}', [\App\Http\Controllers\Admin\Letter\SPController::class, 'downloadStructureFile'])
-                    ->name('download.structure');
+Route::get('/download/sp/{pac}/{id}/{filename}', [
+    \App\Http\Controllers\Admin\Letter\SPController::class,
+    'downloadStructureFile',
+])->name('download.structure');
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/news', [NewsController::class, 'index'])->name('news');
@@ -57,7 +59,7 @@ Route::get('/news/nu/{slug}', [NewsController::class, 'nuNews'])->name('news.nu'
 Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories');
 Route::get('/tags/{slug}', [TagController::class, 'show'])->name('tags');
 Route::get('/calendar', [AgendaController::class, 'index'])->name('calendar.index');
-Route::get('/calendar/full',[AgendaController::class,'getFull'])->name('calendar.full');
+Route::get('/calendar/full', [AgendaController::class, 'getFull'])->name('calendar.full');
 Route::get('/agenda/events', [AgendaController::class, 'getEvents']);
 Route::get('/hbn/events', [HBNController::class, 'getHbnEvents']);
 Route::get('/profiles/{slug}', [ProfileController::class, 'show'])->name('profile.user');
@@ -92,6 +94,9 @@ Route::middleware(['auth', 'role:1,2,3,4'])->group(function () {
     Route::put('/profile/update', [ProfileController::class, 'update'])
         ->name('profile.update')
         ->middleware(['auth']);
+    Route::get('/account/new-password', function () {
+        return redirect()->route('account');
+    });
     Route::post('/account/new-password', [ProfileController::class, 'changePassword'])
         ->name('change-password')
         ->middleware(['auth']);
@@ -180,17 +185,14 @@ Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::get('/dashboard/users/download-pdf/{id}', [PDFController::class, 'cadrePDF'])->name('users.cadre-pdf');
     Route::get('/dashboard/users/pac/pdf/{slug}', [PDFController::class, 'pacPDF'])->name('users.pac-pdf');
 
-    
-
     Route::get('/dashboard/members/pac/{slug}', [MemberController::class, 'showByPAC'])->name('members.pac.list');
-    Route::get('/dashboard/members/pac/{slug}/search', [MemberController::class, 'search'])->name('dashboard.members.pac.search');
+    Route::get('/dashboard/members/pac/{slug}/search', [MemberController::class, 'search'])->name(
+        'dashboard.members.pac.search',
+    );
 
     Route::get('/dashboard/pac', [PACController::class, 'index'])->name('pac.index');
     Route::get('/dashboard/pac/{slug}', [PACController::class, 'show'])->name('pac.show');
-    
-    
-    
-    
+
     Route::get('/dashboard/unverification/', [UserController::class, 'showUnverification'])->name('unverification');
     Route::get('/dashboard/noncadres/', [UserController::class, 'showNoncadres'])->name('noncadre');
     Route::get('/dashboard/national-days/', [HBNController::class, 'index'])->name('hbn.index');
@@ -207,7 +209,7 @@ Route::middleware(['auth', 'role: 1'])->group(function () {
         ->as('dashboard.')
         ->group(function () {
             Route::resource('admins', UserController::class);
-    });
+        });
     Route::get('/dashboard/cadres', [MemberController::class, 'index'])->name('cadres.index');
     Route::get('/dashboard/cadres/create', [MemberController::class, 'create'])->name('cadres.create');
     Route::post('/dashboard/cadres/store', [MemberController::class, 'store'])->name('cadres.store');
@@ -299,12 +301,12 @@ Route::middleware(['auth', 'role:2,3'])->group(function () {
                         SPController::class,
                         'generateIPNUSP',
                     ])->name('validation-submission.generateIPNUSP');
-                    
+
                     Route::get('validation-submission/generate/ippnu/{letter}', [
                         SPController::class,
                         'generateIPPNUSP',
                     ])->name('validation-submission.generateIPPNUSP');
-                    
+
                     Route::resource('validation-submission', SPController::class);
                     Route::prefix('validation-submission')
                         ->as('validation-submission.')
